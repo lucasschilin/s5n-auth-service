@@ -1,9 +1,8 @@
-# schily-auth-api
-**Schily Auth API** é o microserviço de autenticação do **Schily**, responsável pelo cadastro, autenticação e validação de usuários.  
+# schily-users-api
+**Schily Users API** é o microserviço de autenticação do **Schily**, responsável pelo cadastro, autenticação e manipulação de usuário.  
 Ele suporta autenticação via **OAuth 2.0** (Google e Facebook), **autenticação de dois fatores (2FA)** via Google Authenticator e armazena **tokens e senhas de forma segura** com criptografia AES e hash Bcrypt.
 
-Este serviço é consumido pelo frontend do módulo de Autenticação e outros microserviços do **Schily**.
-Toda autenticação é feita via JWT.
+Este serviço é consumido pelo frontend do módulo de Autenticação e Usuário e outros microserviços do **Schily**.
 
 
 ## 🧰 Tecnologias utilizadas
@@ -16,9 +15,8 @@ Toda autenticação é feita via JWT.
 - AES (para criptografia de tokens)
 - Bcrypt (para hashing de senhas)
 - Docker (opcional, para containerização)
-> **Importante:**  
 > - **Tokens OAuth 2.0** serão armazenados em um banco de dados separado, garantindo maior segurança e controle.
 > - **Senhas** de usuários serão hasheadas utilizando **Bcrypt** e armazenadas de forma segura no banco de dados principal.
 
 ## 🔗 Interface Web
-Este repositório é apenas o backend. A interface web está, ou estará, em [schily-auth](https://github.com/lucasschilin/schily-auth).
+Este repositório é apenas o backend. As interfaces web que farão uso desta aplicação estão em outro repositório.
