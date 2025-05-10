@@ -6,6 +6,7 @@
   "scripts": {
     "prepare": "husky install && echo 'npx commitlint --edit $1' > ./.husky/_/commit-msg"
   },
+  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lucasschilin/schily-users-api.git"
