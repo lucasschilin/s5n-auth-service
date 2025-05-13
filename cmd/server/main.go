@@ -6,11 +6,13 @@ import (
 	"net/http"
 
 	"github.com/lucasschilin/schily-users-api/internal/config"
+	"github.com/lucasschilin/schily-users-api/pkg/router"
 )
 
 func main() {
 	config := config.Load()
-	router := SetupRouter()
+
+	r := router.New()
 
 	// Cores ANSI para o terminal
 	green := "\033[32m"
@@ -22,5 +24,5 @@ func main() {
 	fmt.Printf("%sAcessível em http://%s:%s%s/\n", yellow, config.Host, config.Port, reset)
 	fmt.Printf("%sAPI rodando... ✨ 🌐%s\n", blue, reset)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.Port), router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.Port), r))
 }
