@@ -1,7 +1,6 @@
 package health
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,9 +25,6 @@ func TestRootHandler(t *testing.T) {
 
 	bodyExpected := `{"detail":"Schily Users API online 🟢"}`
 	bodyGot := strings.TrimSpace(rr.Body.String())
-
-	fmt.Printf("Body got (raw): %q\n", bodyGot)
-	fmt.Printf("Body expected (raw): %q\n", bodyExpected)
 
 	if bodyGot != bodyExpected {
 		t.Errorf("Expected %v, got %v", bodyExpected, bodyGot)
