@@ -29,5 +29,5 @@ jobs:
       - name: Compilar a aplicação
         run: go build ./...
 
-      - name: Execeutar testes unitários
+      - name: Executar testes automatizados
         run: go test -v ./...

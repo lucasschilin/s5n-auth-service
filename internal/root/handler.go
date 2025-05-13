@@ -1,4 +1,4 @@
-package health
+package root
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]string{
-		"detail": "Schily Users API online 🟢",
+		"detail": "Schily Users API healthed and online 🟢",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
