@@ -27,7 +27,7 @@ jobs:
         run: go mod tidy
 
       - name: Compilar a aplicação
-        run: go build ./...
+        run: go build -o ./build/server ./cmd/server
 
       - name: Executar testes automatizados
         run: go test -v ./...
