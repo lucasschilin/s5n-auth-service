@@ -4,10 +4,7 @@
   "description": "**Schily Users API** é o microserviço de autenticação e manipulação de usuários do **Schily**, responsável pelo cadastro, operações de autenticação e manipulação de usuário.   Ele suporta autenticação via **OAuth 2.0** (Google e Facebook), **autenticação de dois fatores (2FA)** via Google Authenticator e armazena **tokens e senhas de forma segura** com criptografia AES e hash Bcrypt em banco paralelo.",
   "main": "index.js",
   "scripts": {
-    "prepare": "husky install && echo 'npx commitlint --edit $1' > ./.husky/_/commit-msg",
-    "test": "go test -coverprofile cover.out ./... -v && go tool cover -html=cover.out -o coverage.html",
-    "run": "go run ./cmd/server/",
-    "build": "go build -o ./build/server ./cmd/server"
+    "prepare": "husky install && echo 'npx commitlint --edit $1' > ./.husky/_/commit-msg"
   },
   
   "repository": {
