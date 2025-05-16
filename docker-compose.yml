@@ -1,0 +1,28 @@
+services:
+  postgres-schily_users_api_db_users:
+    image: postgres:17
+    container_name: postgres-schily_users_api_db_users
+    environment:
+      - POSTGRES_USER=${DB_USERS_USERNAME}
+      - POSTGRES_PASSWORD=${DB_USERS_PASSWORD}
+      - POSTGRES_DB=${DB_USERS_NAME}
+    ports:
+      - "${DB_USERS_PORT}:5432"
+    volumes:
+      - volume-schily_users_api_db_users:/var/lib/postgresql/data
+
+  postgres-schily_users_api_db_auth:
+    image: postgres:17
+    container_name: postgres-schily_users_api_db_auth
+    environment:
+      - POSTGRES_USER=${DB_AUTH_USERNAME}
+      - POSTGRES_PASSWORD=${DB_AUTH_PASSWORD}
+      - POSTGRES_DB=${DB_AUTH_NAME}
+    ports:
+      - "${DB_AUTH_PORT}:5432"
+    volumes:
+      - volume-schily_users_api_db_auth:/var/lib/postgresql/data
+
+volumes:
+  volume-schily_users_api_db_users:
+  volume-schily_users_api_db_auth:
