@@ -5,7 +5,7 @@ export
 
 # Executa os testes automatizados no modo verboso
 test: 
-	go test -v ./...
+	go test ./... $(ARGS)
 
 # Executa os testes automatizados no modo verboso e cria um .html de coverage
 test-cov: 
@@ -26,7 +26,7 @@ build:
 docker-compose-up:
 	sudo docker compose up -d
 
-# Derruba	 os containers com base no docker-compose.yml
+# Derruba os containers com base no docker-compose.yml
 docker-compose-down:
 	sudo docker compose down
 
