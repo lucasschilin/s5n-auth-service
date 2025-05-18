@@ -7,7 +7,12 @@ import (
 func New() *mux.Router {
 	r := mux.NewRouter()
 
-	RegisterRootRoutes(r)
+	registerRoutes(r)
 
 	return r
+}
+
+func registerRoutes(r *mux.Router) {
+	registerRootRoutes(r)
+	registerAuthRoutes(r)
 }
