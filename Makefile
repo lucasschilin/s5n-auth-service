@@ -85,7 +85,7 @@ migrate-auth-down:
 migrate-auth-force-version:
 	migrate \
 	-path migrations/db_auth \
-	-database "postgres://$(DB_USERS_USERNAME):$(DB_USERS_PASSWORD)@$(DB_USERS_HOST):$(DB_USERS_PORT)/$(DB_USERS_NAME)?sslmode=disable" \
+	-database "postgres://$(DB_AUTH_USERNAME):$(DB_AUTH_PASSWORD)@$(DB_AUTH_HOST):$(DB_AUTH_PORT)/$(DB_AUTH_NAME)?sslmode=disable" \
 	force $(VERSION) 
 # END::GOLANG-MIGRATE  COMMANDS
 
