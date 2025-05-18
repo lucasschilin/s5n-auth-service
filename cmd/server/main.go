@@ -7,7 +7,7 @@ import (
 
 	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/database"
-	"github.com/lucasschilin/schily-users-api/pkg/router"
+	"github.com/lucasschilin/schily-users-api/internal/router"
 )
 
 func main() {
