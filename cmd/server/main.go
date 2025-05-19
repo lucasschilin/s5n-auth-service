@@ -7,16 +7,27 @@ import (
 
 	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/database"
+	"github.com/lucasschilin/schily-users-api/internal/handler"
+	"github.com/lucasschilin/schily-users-api/internal/repository"
 	"github.com/lucasschilin/schily-users-api/internal/router"
+	"github.com/lucasschilin/schily-users-api/internal/service"
 )
 
 func main() {
 	config := config.Load()
 
-	r := router.New()
+	usersDB := database.ConnectDBUsers(config.DBUsers)
+	authDB := database.ConnectDBAuth(config.DBAuth)
 
-	database.ConnectDBUsers(config.DBUsers)
-	database.ConnectDBAuth(config.DBAuth)
+	userRepo := repository.NewUserRepository(usersDB)
+	userEmailRepo := repository.NewUserEmailRepository(usersDB)
+	passwordRepo := repository.NewPasswordRepository(authDB)
+
+	authServ := service.NewAuthService(userRepo, userEmailRepo, passwordRepo)
+
+	authHand := handler.NewAuthHandler(authServ)
+
+	r := router.Setup(authHand)
 
 	// Cores ANSI para o terminal
 	green := "\033[32m"
