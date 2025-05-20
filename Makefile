@@ -79,7 +79,7 @@ migrate-auth-down:
 	migrate \
 	-path migrations/db_auth \
 	-database "postgres://$(DB_AUTH_USERNAME):$(DB_AUTH_PASSWORD)@$(DB_AUTH_HOST):$(DB_AUTH_PORT)/$(DB_AUTH_NAME)?sslmode=disable" \
-	down 
+	down $(STEP)
 
 # Ignore a falha anterior, e considere o banco no estado da versão $(VERSION).
 migrate-auth-force-version:
