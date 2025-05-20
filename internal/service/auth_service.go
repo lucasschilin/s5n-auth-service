@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
 )
@@ -28,5 +30,23 @@ func NewAuthService(
 }
 
 func (s *authService) Signup(req *dto.AuthSignupRequest) (*dto.AuthSignupResponse, *dto.ControllerError) {
-	return nil, nil
+	fmt.Println("Chegou aqui:", req)
+
+	return &dto.AuthSignupResponse{
+		User: dto.AuthSignupUserResponse{
+			ID:       "tsaufsb",
+			Username: "lucaslash",
+		},
+		AccessToken:  "accesstoketeste",
+		RefreshToken: "refreshoketeste",
+	}, nil
+
+	// if 1 == 1 {
+	// 	return nil, &dto.ControllerError{
+	// 		Code:   http.StatusBadRequest,
+	// 		Detail: "Bad Request",
+	// 	}
+	// }
+
+	// TODO: Continue implement de signup feature
 }

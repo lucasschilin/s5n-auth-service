@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/service"
 )
 
@@ -22,7 +24,26 @@ func NewAuthHandler(authServ service.AuthService) AuthHandler {
 }
 
 func (h *authHandler) Signup(w http.ResponseWriter, r *http.Request) {
-	//
+	var req *dto.AuthSignupRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+			Detail: err.Error(),
+		})
+		return
+	}
 
-	fmt.Println("teste")
+	res, err := h.AuthService.Signup(req)
+	if err != nil {
+		w.WriteHeader(err.Code)
+		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+			Detail: err.Detail,
+		})
+		return
+	}
+
+	fmt.Println(res)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }
