@@ -7,8 +7,13 @@ import (
 	"github.com/lucasschilin/schily-users-api/internal/handler"
 )
 
-func Setup(authHand handler.AuthHandler) *mux.Router {
+func Setup(
+	authHand handler.AuthHandler,
+	rootHand handler.RootHandler,
+) *mux.Router {
 	r := mux.NewRouter()
+
+	r.HandleFunc("/", rootHand.Root).Methods(http.MethodGet)
 
 	r.HandleFunc("/auth/signup", authHand.Signup).Methods(http.MethodPost)
 

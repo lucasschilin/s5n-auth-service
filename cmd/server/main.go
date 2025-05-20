@@ -26,8 +26,9 @@ func main() {
 	authServ := service.NewAuthService(userRepo, userEmailRepo, passwordRepo)
 
 	authHand := handler.NewAuthHandler(authServ)
+	rootHand := handler.NewRootHandler()
 
-	r := router.Setup(authHand)
+	r := router.Setup(authHand, rootHand)
 
 	// Cores ANSI para o terminal
 	green := "\033[32m"

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -12,14 +11,10 @@ type RootHandler interface {
 	Root(w http.ResponseWriter, r *http.Request)
 }
 
-type rootHandler struct {
-	DB *sql.DB
-}
+type rootHandler struct{}
 
-func (h *rootHandler) NewRootHandler(db *sql.DB) RootHandler {
-	return &rootHandler{
-		DB: db,
-	}
+func NewRootHandler() RootHandler {
+	return &rootHandler{}
 }
 
 func (h *rootHandler) Root(w http.ResponseWriter, r *http.Request) {
