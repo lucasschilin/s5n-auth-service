@@ -1,6 +1,6 @@
 package dto
 
-type ControllerError struct {
+type DefaultError struct {
 	Code   int
 	Detail string
 }

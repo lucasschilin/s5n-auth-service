@@ -2,13 +2,15 @@ package service
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
+	"github.com/lucasschilin/schily-users-api/internal/validator"
 )
 
 type AuthService interface {
-	Signup(req *dto.AuthSignupRequest) (*dto.AuthSignupResponse, *dto.ControllerError)
+	Signup(req *dto.AuthSignupRequest) (*dto.AuthSignupResponse, *dto.DefaultError)
 }
 
 type authService struct {
@@ -29,8 +31,34 @@ func NewAuthService(
 	}
 }
 
-func (s *authService) Signup(req *dto.AuthSignupRequest) (*dto.AuthSignupResponse, *dto.ControllerError) {
-	fmt.Println("Chegou aqui:", req)
+func (s *authService) Signup(req *dto.AuthSignupRequest) (*dto.AuthSignupResponse, *dto.DefaultError) {
+	if _, err := validator.IsValidAuthSignupRequest(req); err != nil {
+		return nil, err
+	}
+
+	const MinPasswordLength = 8
+	if len(req.Password) < MinPasswordLength {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusBadRequest,
+			Detail: fmt.Sprintf("Password must have at least %v characters.", MinPasswordLength),
+		}
+	}
+
+	if req.Password != req.ConfirmPassword {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusBadRequest,
+			Detail: "Password and confirmation password must match.",
+		}
+	}
+
+	if !validator.IsValidEmailAddress(req.Email) {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusBadRequest,
+			Detail: "E-mail must be a valid address",
+		}
+	}
+
+	// TODO: Continue implement de signup feature
 
 	return &dto.AuthSignupResponse{
 		User: dto.AuthSignupUserResponse{
@@ -41,12 +69,4 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (*dto.AuthSignupRespons
 		RefreshToken: "refreshoketeste",
 	}, nil
 
-	// if 1 == 1 {
-	// 	return nil, &dto.ControllerError{
-	// 		Code:   http.StatusBadRequest,
-	// 		Detail: "Bad Request",
-	// 	}
-	// }
-
-	// TODO: Continue implement de signup feature
 }
