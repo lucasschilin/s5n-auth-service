@@ -7,7 +7,9 @@ import (
 )
 
 type UserRepository interface {
-	GetByEmailAddress(address string) (*model.User, error)
+	CreateWithTX(
+		tx *sql.Tx, newID string, username string,
+	) (*model.User, error)
 }
 
 type userRepository struct {
@@ -20,6 +22,18 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	}
 }
 
-func (r *userRepository) GetByEmailAddress(address string) (*model.User, error) {
-	return nil, nil
+func (r *userRepository) CreateWithTX(
+	tx *sql.Tx, newID string, username string,
+) (*model.User, error) {
+	var user model.User
+
+	if err := tx.QueryRow(
+		"INSERT INTO users (id, username) VALUES ($1, $2) RETURNING id, username, created_at, updated_at",
+		newID,
+		username,
+	).Scan(&user.ID, &user.Username, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

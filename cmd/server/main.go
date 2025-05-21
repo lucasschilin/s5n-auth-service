@@ -23,7 +23,9 @@ func main() {
 	userEmailRepo := repository.NewUserEmailRepository(usersDB)
 	passwordRepo := repository.NewPasswordRepository(authDB)
 
-	authServ := service.NewAuthService(userRepo, userEmailRepo, passwordRepo)
+	authServ := service.NewAuthService(
+		usersDB, authDB, userRepo, userEmailRepo, passwordRepo,
+	)
 
 	authHand := handler.NewAuthHandler(authServ)
 	rootHand := handler.NewRootHandler()
@@ -37,7 +39,10 @@ func main() {
 	reset := "\033[0m"
 
 	fmt.Printf("%s🚀 API INICIADA! 🚀%s\n", green, reset)
-	fmt.Printf("%sAcessível em http://%s:%s%s/\n", yellow, config.API.Host, config.API.Port, reset)
+	fmt.Printf(
+		"%sAcessível em http://%s:%s%s/\n",
+		yellow, config.API.Host, config.API.Port, reset,
+	)
 	fmt.Printf("%sAPI rodando... ✨ 🌐%s\n", blue, reset)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.API.Port), r))

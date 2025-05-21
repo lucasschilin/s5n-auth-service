@@ -25,9 +25,9 @@ func NewAuthHandler(authServ service.AuthService) AuthHandler {
 func (h *authHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var req *dto.AuthSignupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
-			Detail: err.Error(),
+			Detail: "The server cannot process your request.",
 		})
 		return
 	}

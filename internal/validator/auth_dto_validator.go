@@ -10,7 +10,7 @@ func IsValidAuthSignupRequest(req *dto.AuthSignupRequest) (bool, *dto.DefaultErr
 	if req.Email == "" {
 		return false, &dto.DefaultError{
 			Code:   http.StatusBadRequest,
-			Detail: "E-mail is required.",
+			Detail: "Email is required.",
 		}
 	}
 

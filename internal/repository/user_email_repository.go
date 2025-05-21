@@ -21,5 +21,17 @@ func NewUserEmailRepository(db *sql.DB) UserEmailRepository {
 }
 
 func (r *userEmailRepository) GetByAddress(address string) (*model.UserEmail, error) {
-	return nil, nil
+	var userEmail model.UserEmail
+
+	if err := r.DB.QueryRow("SELECT * FROM users_emails WHERE address = $1",
+		address).Scan(&userEmail); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return &userEmail, nil
+
 }
