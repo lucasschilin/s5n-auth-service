@@ -177,9 +177,8 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	usersTX.Commit()
 	authTX.Commit()
 
-	// TODO: generate uuid
 	// TODO: crypt password
-	// TODO: create password
+	// TODO: generate JWT
 
 	return &dto.AuthSignupResponse{
 		User: dto.AuthSignupUserResponse{
