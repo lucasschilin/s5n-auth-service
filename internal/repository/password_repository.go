@@ -7,6 +7,9 @@ import (
 )
 
 type PasswordRepository interface {
+	CreateWithTX(
+		tx *sql.Tx, userID *string, password string,
+	) (*model.Password, error)
 }
 
 type passwordRepository struct {
@@ -19,6 +22,22 @@ func NewPasswordRepository(db *sql.DB) PasswordRepository {
 	}
 }
 
-func (r *passwordRepository) GetByEmailAddress(address string) (*model.Password, error) {
-	return nil, nil
+func (r *passwordRepository) CreateWithTX(
+	tx *sql.Tx, userID *string, password string,
+) (*model.Password, error) {
+	var newPassword model.Password
+
+	if err := tx.QueryRow(
+		`INSERT INTO passwords ("user", password) VALUES ($1, $2) RETURNING *`,
+		userID, password,
+	).Scan(
+		&newPassword.User,
+		&newPassword.Password,
+		&newPassword.CreatedAt,
+		&newPassword.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &newPassword, nil
 }

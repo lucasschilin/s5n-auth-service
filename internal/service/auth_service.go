@@ -142,6 +142,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred.",
 		}
 	}
+	fmt.Println(newUser)
 
 	verifyToken, err := nanoid.Generate(nanoid.DefaultAlphabet, 50)
 	if err != nil {
@@ -151,7 +152,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		}
 	}
 
-	_, err = s.UserEmailRepository.CreateWithTX(
+	newUserEmail, err := s.UserEmailRepository.CreateWithTX(
 		usersTX, &newUser.ID, &req.Email, &verifyToken,
 	)
 	if err != nil {
@@ -160,8 +161,21 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred. " + err.Error(),
 		}
 	}
+	fmt.Println(newUserEmail)
 
-	// usersTX.Commit()
+	newPassword, err := s.PasswordRepository.CreateWithTX(
+		authTX, &newUser.ID, req.Password,
+	)
+	if err != nil {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusInternalServerError,
+			Detail: "An error occurred. " + err.Error(),
+		}
+	}
+	fmt.Println(newPassword)
+
+	usersTX.Commit()
+	authTX.Commit()
 
 	// TODO: generate uuid
 	// TODO: crypt password
