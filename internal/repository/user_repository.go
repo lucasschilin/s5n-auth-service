@@ -26,7 +26,8 @@ func NewUserRepository(db *sql.DB) UserRepository {
 
 func (r *userRepository) GetByUsername(username *string) (*model.User, error) {
 	var user model.User
-	if err := r.DB.QueryRow("SELECT * FROM users WHERE username = $1",
+	if err := r.DB.QueryRow(
+		"SELECT id, username, created_at, updated_at FROM users WHERE username = $1",
 		username,
 	).Scan(&user.ID, &user.Username, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {

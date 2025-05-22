@@ -121,7 +121,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	if err != nil {
 		return nil, &dto.DefaultError{
 			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
+			Detail: "An error occurred." + err.Error(),
 		}
 	}
 	if user != nil {
@@ -142,7 +142,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred.",
 		}
 	}
-	fmt.Println(newUser)
 
 	verifyToken, err := nanoid.Generate(nanoid.DefaultAlphabet, 50)
 	if err != nil {
@@ -165,7 +164,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	usersTX.Commit()
 
-	// BUG: fix probably username validation error
 	// TODO: generate uuid
 	// TODO: crypt password
 	// TODO: create password
