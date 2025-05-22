@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/aidarkhanov/nanoid"
 	"github.com/lucasschilin/schily-users-api/internal/dto"
@@ -80,7 +81,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "Email cannot be validated.",
 		}
 	}
-
 	if userEmail != nil {
 		return nil, &dto.DefaultError{
 			Code:   http.StatusConflict,
@@ -107,18 +107,43 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	defer usersTX.Rollback()
 	defer authTX.Rollback()
 
-	newID := nanoid.New()
-	username := "u_" + newID
+	emailUsername := strings.Split(req.Email, "@")[0]
 
-	user, err := s.UserRepository.CreateWithTX(usersTX, newID, username)
+	maxUsernameLength := 13
+	if len(emailUsername) < maxUsernameLength {
+		maxUsernameLength = len(emailUsername)
+	}
+	username := strings.Replace(
+		strings.ToLower(emailUsername[:maxUsernameLength]), ".", "", -1,
+	)
+
+	user, err := s.UserRepository.GetByUsername(&username)
 	if err != nil {
 		return nil, &dto.DefaultError{
 			Code:   http.StatusInternalServerError,
-			Detail: err.Error(),
-			// Detail: "An error occurred. ",
+			Detail: "An error occurred.",
 		}
 	}
-	fmt.Println(user)
+	if user == nil {
+		sufix, err := nanoid.Generate(nanoid.DefaultAlphabet, 5)
+		if err != nil {
+			return nil, &dto.DefaultError{
+				Code:   http.StatusInternalServerError,
+				Detail: "An error occurred.",
+			}
+		}
+		username = strings.ToLower(fmt.Sprintf("%s_%s", username, sufix))
+	}
+
+	newUser, err := s.UserRepository.CreateWithTX(usersTX, &username)
+	if err != nil {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusInternalServerError,
+			Detail: "An error occurred.",
+		}
+	}
+
+	fmt.Println(newUser.ID, newUser.Username)
 
 	// TODO: create user_email
 	// TODO: generate uuid
