@@ -7,7 +7,7 @@ type UserEmail struct {
 	User        string    `json:"user"`
 	Address     string    `json:"address"`
 	VerifyToken string    `json:"verify_token"`
-	VerifiedAt  string    `json:"verified_at"`
+	VerifiedAt  time.Time `json:"verified_at"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DeletedAt   time.Time `json:"deleted_at"`

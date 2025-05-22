@@ -42,17 +42,16 @@ func (r *userRepository) GetByUsername(username *string) (*model.User, error) {
 func (r *userRepository) CreateWithTX(
 	tx *sql.Tx, username *string,
 ) (*model.User, error) {
-	var user model.User
+	var newUser model.User
 
 	newID := nanoid.New()
 
 	if err := tx.QueryRow(
 		"INSERT INTO users (id, username) VALUES ($1, $2) RETURNING id, username, created_at, updated_at",
-		newID,
-		username,
-	).Scan(&user.ID, &user.Username, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		newID, username,
+	).Scan(&newUser.ID, &newUser.Username, &newUser.CreatedAt, &newUser.UpdatedAt); err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &newUser, nil
 }
