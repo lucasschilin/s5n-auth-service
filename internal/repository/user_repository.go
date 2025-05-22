@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/aidarkhanov/nanoid"
 	"github.com/lucasschilin/schily-users-api/internal/model"
 )
 
@@ -45,11 +44,9 @@ func (r *userRepository) CreateWithTX(
 ) (*model.User, error) {
 	var newUser model.User
 
-	newID := nanoid.New()
-
 	if err := tx.QueryRow(
 		"INSERT INTO users (id, username) VALUES ($1, $2) RETURNING id, username, created_at, updated_at",
-		newID, username,
+		newID(), username,
 	).Scan(&newUser.ID, &newUser.Username, &newUser.CreatedAt, &newUser.UpdatedAt); err != nil {
 		return nil, err
 	}

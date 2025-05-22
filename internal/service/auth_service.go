@@ -151,7 +151,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		}
 	}
 
-	newUserEmail, err := s.UserEmailRepository.CreateWithTX(
+	_, err = s.UserEmailRepository.CreateWithTX(
 		usersTX, &newUser.ID, &req.Email, &verifyToken,
 	)
 	if err != nil {
@@ -160,9 +160,8 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred. " + err.Error(),
 		}
 	}
-	fmt.Println(newUserEmail)
 
-	usersTX.Commit()
+	// usersTX.Commit()
 
 	// TODO: generate uuid
 	// TODO: crypt password
@@ -170,8 +169,8 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	return &dto.AuthSignupResponse{
 		User: dto.AuthSignupUserResponse{
-			ID:       "tsaufsb",
-			Username: "lucaslash",
+			ID:       newUser.ID,
+			Username: newUser.Username,
 		},
 		AccessToken:  "accesstoketeste",
 		RefreshToken: "refreshoketeste",
