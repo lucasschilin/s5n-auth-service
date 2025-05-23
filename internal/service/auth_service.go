@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/aidarkhanov/nanoid"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
 	"github.com/lucasschilin/schily-users-api/internal/validator"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
@@ -79,7 +83,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	if err != nil {
 		return nil, &dto.DefaultError{
 			Code:   http.StatusInternalServerError,
-			Detail: "Email cannot be validated.",
+			Detail: "Email cannot be validated. " + err.Error(),
 		}
 	}
 	if userEmail != nil {
@@ -176,23 +180,59 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	if err != nil {
 		return nil, &dto.DefaultError{
 			Code:   http.StatusInternalServerError,
+			Detail: "An error occurred.",
+		}
+	}
+
+	config := config.Load()
+
+	secretKey := []byte(config.JWT.SecretKey)
+	accessTokenExpiration := time.Now().Add(30 * time.Minute)
+	refreshTokenExpiration := time.Now().Add(24 * time.Hour)
+
+	mapClaims := jwt.MapClaims{
+		"iat":  time.Now().Unix(),
+		"exp":  accessTokenExpiration,
+		"sub":  newUser.ID,
+		"type": "access_token",
+	}
+	accessTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	accessToken, err := accessTokenObj.SignedString(secretKey)
+	if err != nil {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusInternalServerError,
 			Detail: "An error occurred. " + err.Error(),
 		}
 	}
-	// TODO: generate JWT
 
-	// usersTX.Commit()
-	// authTX.Commit()
+	mapClaims = jwt.MapClaims{
+		"iat":  time.Now().Unix(),
+		"exp":  refreshTokenExpiration,
+		"sub":  newUser.ID,
+		"type": "refresh_token",
+	}
+	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	refreshToken, err := refreshTokenObj.SignedString(secretKey)
+	if err != nil {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusInternalServerError,
+			Detail: "An error occurred. " + err.Error(),
+		}
+	}
+
+	usersTX.Commit()
+	authTX.Commit()
 
 	return &dto.AuthSignupResponse{
 		User: dto.AuthSignupUserResponse{
 			ID:       newUser.ID,
 			Username: newUser.Username,
 		},
-		AccessToken:  "accesstoketeste",
-		RefreshToken: "refreshoketeste",
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 
 }
 
-// TODO: refactor return error (DRY)
+// TODO: refactor return errors (DRY)
+// TODO: migrate bcrypt, JWT to adapters
