@@ -1,9 +1,5 @@
 # schily-users-api
-**Schily Users API** é o microserviço de autenticação e manipulação de usuários do **Schily**, responsável pelo cadastro, operações de autenticação e manipulação de usuário.  
-Ele suporta autenticação via **OAuth 2.0** (Google e Facebook), **autenticação de dois fatores (2FA)** via Google Authenticator e armazena **tokens e senhas de forma segura** com criptografia AES e hash Bcrypt em banco paralelo.
-
-Este serviço é consumido pelo frontend do módulo de Autenticação e Usuário e outros microserviços do **Schily**.
-
+**Schily Users API** é o microserviço de autenticação e manipulação de usuários da aplicação **Schily**.
 
 ## 🧰 Tecnologias utilizadas
 - **Go 1.24**
