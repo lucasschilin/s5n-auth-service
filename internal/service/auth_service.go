@@ -143,7 +143,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred.",
 		}
 	}
-	fmt.Println(newUser)
 
 	verifyToken, err := nanoid.Generate(nanoid.DefaultAlphabet, 50)
 	if err != nil {
@@ -153,7 +152,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		}
 	}
 
-	newUserEmail, err := s.UserEmailRepository.CreateWithTX(
+	_, err = s.UserEmailRepository.CreateWithTX(
 		usersTX, &newUser.ID, &req.Email, &verifyToken,
 	)
 	if err != nil {
@@ -162,7 +161,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred.",
 		}
 	}
-	fmt.Println(newUserEmail)
 
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
 	if err != nil {
@@ -172,7 +170,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		}
 	}
 
-	newPassword, err := s.PasswordRepository.CreateWithTX(
+	_, err = s.PasswordRepository.CreateWithTX(
 		authTX, &newUser.ID, string(bcryptedPassword),
 	)
 	if err != nil {
@@ -181,7 +179,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 			Detail: "An error occurred. " + err.Error(),
 		}
 	}
-	fmt.Println(newPassword)
 	// TODO: generate JWT
 
 	// usersTX.Commit()
