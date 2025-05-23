@@ -29,7 +29,11 @@ func (r *userEmailRepository) GetByAddress(
 	var userEmail model.UserEmail
 
 	if err := r.DB.QueryRow("SELECT * FROM users_emails WHERE address = $1",
-		address).Scan(&userEmail); err != nil {
+		address).Scan(
+		&userEmail.ID, &userEmail.User, &userEmail.Address,
+		&userEmail.VerifyToken, &userEmail.VerifiedAt,
+		&userEmail.CreatedAt, &userEmail.UpdatedAt, &userEmail.DeletedAt,
+	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
