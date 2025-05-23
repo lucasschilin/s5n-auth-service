@@ -10,6 +10,7 @@ import (
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
 	"github.com/lucasschilin/schily-users-api/internal/validator"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
@@ -158,13 +159,21 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	if err != nil {
 		return nil, &dto.DefaultError{
 			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred. " + err.Error(),
+			Detail: "An error occurred.",
 		}
 	}
 	fmt.Println(newUserEmail)
 
+	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
+	if err != nil {
+		return nil, &dto.DefaultError{
+			Code:   http.StatusInternalServerError,
+			Detail: "An error occurred.",
+		}
+	}
+
 	newPassword, err := s.PasswordRepository.CreateWithTX(
-		authTX, &newUser.ID, req.Password,
+		authTX, &newUser.ID, string(bcryptedPassword),
 	)
 	if err != nil {
 		return nil, &dto.DefaultError{
@@ -173,12 +182,10 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		}
 	}
 	fmt.Println(newPassword)
-
-	usersTX.Commit()
-	authTX.Commit()
-
-	// TODO: crypt password
 	// TODO: generate JWT
+
+	// usersTX.Commit()
+	// authTX.Commit()
 
 	return &dto.AuthSignupResponse{
 		User: dto.AuthSignupUserResponse{
