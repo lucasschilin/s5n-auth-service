@@ -56,57 +56,48 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	const MinPasswordLength = 8
 	if len(req.Password) < MinPasswordLength {
-		return nil, &dto.DefaultError{
-			Code: http.StatusUnprocessableEntity,
-			Detail: fmt.Sprintf(
+		return nil, errorResponse(
+			http.StatusUnprocessableEntity,
+			fmt.Sprintf(
 				"Password must have at least %v characters.",
 				MinPasswordLength,
 			),
-		}
+		)
 	}
 
 	if req.Password != req.ConfirmPassword {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusUnprocessableEntity,
-			Detail: "Password and confirmation password must match.",
-		}
+		return nil, errorResponse(
+			http.StatusUnprocessableEntity,
+			"Password and confirmation password must match.",
+		)
 	}
 
 	if !validator.IsValidEmailAddress(req.Email) {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusBadRequest,
-			Detail: "Email must be a valid address",
-		}
+		return nil, errorResponse(
+			http.StatusBadRequest, "Email must be a valid address",
+		)
 	}
 
 	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "Email cannot be validated. " + err.Error(),
-		}
+		return nil, errorResponse(
+			http.StatusInternalServerError, "Email cannot be validated.",
+		)
 	}
 	if userEmail != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusConflict,
-			Detail: "Email already in use.",
-		}
+		return nil, errorResponse(http.StatusConflict, "Email already in use.")
 	}
 
 	usersTX, err := s.UsersDB.Begin()
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	authTX, err := s.AuthDB.Begin()
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errorResponse(
+			http.StatusInternalServerError, "An error occurred.",
+		)
 	}
 
 	defer usersTX.Rollback()
@@ -124,64 +115,43 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	user, err := s.UserRepository.GetByUsername(&username)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred." + err.Error(),
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 	if user != nil {
 		sufix, err := nanoid.Generate(nanoid.DefaultAlphabet, 5)
 		if err != nil {
-			return nil, &dto.DefaultError{
-				Code:   http.StatusInternalServerError,
-				Detail: "An error occurred.",
-			}
+			return nil, errAuthSignupInternalServerError
 		}
 		username = strings.ToLower(fmt.Sprintf("%s_%s", username, sufix))
 	}
 
 	newUser, err := s.UserRepository.CreateWithTX(usersTX, &username)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	verifyToken, err := nanoid.Generate(nanoid.DefaultAlphabet, 50)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	_, err = s.UserEmailRepository.CreateWithTX(
 		usersTX, &newUser.ID, &req.Email, &verifyToken,
 	)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	_, err = s.PasswordRepository.CreateWithTX(
 		authTX, &newUser.ID, string(bcryptedPassword),
 	)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred.",
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	config := config.Load()
@@ -199,10 +169,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	accessTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
 	accessToken, err := accessTokenObj.SignedString(secretKey)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred. " + err.Error(),
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	mapClaims = jwt.MapClaims{
@@ -214,10 +181,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
 	refreshToken, err := refreshTokenObj.SignedString(secretKey)
 	if err != nil {
-		return nil, &dto.DefaultError{
-			Code:   http.StatusInternalServerError,
-			Detail: "An error occurred. " + err.Error(),
-		}
+		return nil, errAuthSignupInternalServerError
 	}
 
 	usersTX.Commit()
@@ -234,5 +198,4 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 }
 
-// TODO: refactor return errors (DRY)
 // TODO: migrate bcrypt, JWT to adapters
