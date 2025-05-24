@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/aidarkhanov/nanoid"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/lucasschilin/schily-users-api/internal/adapter"
 	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
@@ -155,32 +155,33 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	}
 
 	config := config.Load()
+	jwtSecretKey := config.JWT.SecretKey
 
-	secretKey := []byte(config.JWT.SecretKey)
-	accessTokenExpiration := time.Now().Add(30 * time.Minute)
-	refreshTokenExpiration := time.Now().Add(24 * time.Hour)
+	jwtAdapter := adapter.NewJWT(jwtSecretKey)
 
-	mapClaims := jwt.MapClaims{
+	accessTokenExpiration := time.Now().Add(30 * time.Minute).Unix()
+	mapClaims := map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"exp":  accessTokenExpiration,
 		"sub":  newUser.ID,
 		"type": "access_token",
 	}
-	accessTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
-	accessToken, err := accessTokenObj.SignedString(secretKey)
+	accessToken, err := jwtAdapter.GenerateToken(mapClaims)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, errAuthSignupInternalServerError
 	}
 
-	mapClaims = jwt.MapClaims{
+	refreshTokenExpiration := time.Now().Add(24 * time.Hour).Unix()
+	mapClaims = map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"exp":  refreshTokenExpiration,
 		"sub":  newUser.ID,
 		"type": "refresh_token",
 	}
-	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
-	refreshToken, err := refreshTokenObj.SignedString(secretKey)
+	refreshToken, err := jwtAdapter.GenerateToken(mapClaims)
 	if err != nil {
+		fmt.Println(err.Error())
 		return nil, errAuthSignupInternalServerError
 	}
 
@@ -195,7 +196,4 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
-
 }
-
-// TODO: migrate bcrypt, JWT to adapters
