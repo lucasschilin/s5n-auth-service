@@ -50,8 +50,11 @@ func NewAuthService(
 func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	*dto.AuthSignupResponse, *dto.DefaultError,
 ) {
-	if _, err := validator.IsValidAuthSignupRequest(req); err != nil {
-		return nil, err
+	if val, detail := validator.IsValidAuthSignupRequest(req); !val {
+		return nil, errorResponse(
+			http.StatusUnprocessableEntity,
+			detail,
+		)
 	}
 
 	const MinPasswordLength = 8

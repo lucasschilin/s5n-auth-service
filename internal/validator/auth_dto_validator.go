@@ -1,32 +1,21 @@
 package validator
 
 import (
-	"net/http"
-
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 )
 
-func IsValidAuthSignupRequest(req *dto.AuthSignupRequest) (bool, *dto.DefaultError) {
+func IsValidAuthSignupRequest(req *dto.AuthSignupRequest) (bool, string) {
 	if req.Email == "" {
-		return false, &dto.DefaultError{
-			Code:   http.StatusBadRequest,
-			Detail: "Email is required.",
-		}
+		return false, "Email is required."
 	}
 
 	if req.Password == "" {
-		return false, &dto.DefaultError{
-			Code:   http.StatusBadRequest,
-			Detail: "Password is required.",
-		}
+		return false, "Password is required."
 	}
 
 	if req.ConfirmPassword == "" {
-		return false, &dto.DefaultError{
-			Code:   http.StatusBadRequest,
-			Detail: "Confirmation password is required.",
-		}
+		return false, "Confirmation password is required."
 	}
 
-	return true, nil
+	return true, ""
 }
