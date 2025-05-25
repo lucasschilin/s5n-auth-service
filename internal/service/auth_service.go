@@ -10,9 +10,8 @@ import (
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/lucasschilin/schily-users-api/internal/adapter"
-	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/dto"
+	"github.com/lucasschilin/schily-users-api/internal/port"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
 	"github.com/lucasschilin/schily-users-api/internal/validator"
 )
@@ -29,6 +28,7 @@ type authService struct {
 	UserRepository      repository.UserRepository
 	UserEmailRepository repository.UserEmailRepository
 	PasswordRepository  repository.PasswordRepository
+	JWTAdapter          port.JWT
 }
 
 func NewAuthService(
@@ -37,6 +37,7 @@ func NewAuthService(
 	userRepo repository.UserRepository,
 	userEmailRepo repository.UserEmailRepository,
 	passwordRepo repository.PasswordRepository,
+	jwtAdapter port.JWT,
 ) AuthService {
 	return &authService{
 		UsersDB:             usersDB,
@@ -44,6 +45,7 @@ func NewAuthService(
 		UserRepository:      userRepo,
 		UserEmailRepository: userEmailRepo,
 		PasswordRepository:  passwordRepo,
+		JWTAdapter:          jwtAdapter,
 	}
 }
 
@@ -149,11 +151,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		return nil, errAuthSignupInternalServerError
 	}
 
-	config := config.Load()
-	jwtSecretKey := config.JWT.SecretKey
-
-	jwtAdapter := adapter.NewJWT(jwtSecretKey)
-
 	accessTokenExpiration := time.Now().Add(30 * time.Minute).Unix()
 	mapClaims := map[string]interface{}{
 		"iat":  time.Now().Unix(),
@@ -161,7 +158,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		"sub":  newUser.ID,
 		"type": "access_token",
 	}
-	accessToken, err := jwtAdapter.GenerateToken(mapClaims)
+	accessToken, err := s.JWTAdapter.GenerateToken(mapClaims)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, errAuthSignupInternalServerError
@@ -174,7 +171,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		"sub":  newUser.ID,
 		"type": "refresh_token",
 	}
-	refreshToken, err := jwtAdapter.GenerateToken(mapClaims)
+	refreshToken, err := s.JWTAdapter.GenerateToken(mapClaims)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, errAuthSignupInternalServerError

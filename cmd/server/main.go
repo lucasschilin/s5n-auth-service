@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/lucasschilin/schily-users-api/internal/adapter"
 	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/database"
 	"github.com/lucasschilin/schily-users-api/internal/handler"
@@ -23,8 +24,10 @@ func main() {
 	userEmailRepo := repository.NewUserEmailRepository(usersDB)
 	passwordRepo := repository.NewPasswordRepository(authDB)
 
+	jwtAdapter := adapter.NewJWT(config.JWT.SecretKey)
+
 	authServ := service.NewAuthService(
-		usersDB, authDB, userRepo, userEmailRepo, passwordRepo,
+		usersDB, authDB, userRepo, userEmailRepo, passwordRepo, jwtAdapter,
 	)
 
 	authHand := handler.NewAuthHandler(authServ)
