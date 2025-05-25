@@ -2,13 +2,14 @@ package adapter
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lucasschilin/schily-users-api/internal/port"
 )
 
 type JWT struct {
 	secretKey string
 }
 
-func NewJWT(secretKey string) *JWT {
+func NewJWT(secretKey string) port.JWT {
 	return &JWT{
 		secretKey: secretKey,
 	}
