@@ -14,10 +14,17 @@ func IsValidEmailAddress(address string) bool {
 	}
 
 	parts := strings.Split(address, "@")
-	if len(parts) != 2 {
+	username := parts[0]
+	domain := parts[1]
+
+	rfc5321FullAddressMaxLength := 254
+	if len(address) > rfc5321FullAddressMaxLength {
 		return false
 	}
-	domain := parts[1]
+	rfc5321UsernameAddressMaxLength := 64
+	if len(username) > rfc5321UsernameAddressMaxLength {
+		return false
+	}
 
 	mxRecords, err := net.LookupMX(domain)
 	if err != nil || len(mxRecords) == 0 {
