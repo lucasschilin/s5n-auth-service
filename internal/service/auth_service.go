@@ -95,27 +95,19 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	if err != nil {
 		return nil, errAuthSignupInternalServerError
 	}
-
 	authTX, err := s.AuthDB.Begin()
 	if err != nil {
-		return nil, errorResponse(
-			http.StatusInternalServerError, "An error occurred.",
-		)
+		return nil, errAuthSignupInternalServerError
 	}
-
 	defer usersTX.Rollback()
 	defer authTX.Rollback()
 
 	emailUsername := strings.Split(req.Email, "@")[0]
-
 	maxUsernameLength := 13
 	if len(emailUsername) < maxUsernameLength {
 		maxUsernameLength = len(emailUsername)
 	}
-	username := strings.Replace(
-		strings.ToLower(emailUsername[:maxUsernameLength]), ".", "", -1,
-	)
-
+	username := strings.ToLower(emailUsername[:maxUsernameLength])
 	user, err := s.UserRepository.GetByUsername(&username)
 	if err != nil {
 		return nil, errAuthSignupInternalServerError
