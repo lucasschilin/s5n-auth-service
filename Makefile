@@ -1,6 +1,8 @@
 include .env
 export
 
+.PHONY: test
+
 # START::APP COMMANDS
 
 # Executa os testes automatizados no modo verboso
