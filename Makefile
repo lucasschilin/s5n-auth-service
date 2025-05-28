@@ -1,13 +1,15 @@
 include .env
 export
 
+.PHONY: test
+
 # START::APP COMMANDS
 
-# Executa os testes automatizados no modo verboso
+# Executa os testes
 test: 
-	go test ./... $(ARGS)
+	go test ./...
 
-# Executa os testes automatizados no modo verboso e cria um .html de coverage
+# Executa os testes no modo verboso e cria um .html de coverage
 test-cov: 
 	go test -coverprofile cover.out ./... -v && go tool cover -html=cover.out -o coverage.html
 
@@ -41,19 +43,19 @@ docker-compose-logs:
 migrate-users-create:
 	migrate create -ext sql -dir migrations/db_users/ -seq $(MIG_NAME)
 
-# Faz o upgrade do banco de dados conforme última versão do migrate
+# Faz o upgrade do banco de dados conforme última versão do migrate ou do 0 até + $(STEP)
 migrate-users-up:
 	migrate \
 	-path migrations/db_users \
 	-database "postgres://$(DB_USERS_USERNAME):$(DB_USERS_PASSWORD)@$(DB_USERS_HOST):$(DB_USERS_PORT)/$(DB_USERS_NAME)?sslmode=disable" \
-	up 
+	up $(STEP)
 
-# Faz o upgrade do banco de dados conforme última versão do migrate
+# Faz o downgrade do banco de dados conforme última versão do migrate ou da versao atual - $(STEP)
 migrate-users-down:
 	migrate \
 	-path migrations/db_users \
 	-database "postgres://$(DB_USERS_USERNAME):$(DB_USERS_PASSWORD)@$(DB_USERS_HOST):$(DB_USERS_PORT)/$(DB_USERS_NAME)?sslmode=disable" \
-	down 
+	down $(STEP)
 
 # Ignore a falha anterior, e considere o banco no estado da versão $(VERSION).
 migrate-users-force-version:
@@ -67,19 +69,19 @@ migrate-users-force-version:
 migrate-auth-create:
 	migrate create -ext sql -dir migrations/db_auth/ -seq $(MIG_NAME)
 
-# Faz o upgrade do banco de dados conforme última versão do migrate
+# Faz o upgrade do banco de dados conforme última versão do migrate ou do 0 até + $(STEP)
 migrate-auth-up:
 	migrate \
 	-path migrations/db_auth \
 	-database "postgres://$(DB_AUTH_USERNAME):$(DB_AUTH_PASSWORD)@$(DB_AUTH_HOST):$(DB_AUTH_PORT)/$(DB_AUTH_NAME)?sslmode=disable" \
-	up 
+	up $(STEP)
 
-# Faz o upgrade do banco de dados conforme última versão do migrate
+# Faz o downgrade do banco de dados conforme última versão do migrate ou da versao atual - $(STEP)
 migrate-auth-down:
 	migrate \
 	-path migrations/db_auth \
 	-database "postgres://$(DB_AUTH_USERNAME):$(DB_AUTH_PASSWORD)@$(DB_AUTH_HOST):$(DB_AUTH_PORT)/$(DB_AUTH_NAME)?sslmode=disable" \
-	down 
+	down $(STEP)
 
 # Ignore a falha anterior, e considere o banco no estado da versão $(VERSION).
 migrate-auth-force-version:

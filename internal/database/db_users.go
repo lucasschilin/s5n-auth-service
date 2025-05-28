@@ -10,9 +10,7 @@ import (
 	"github.com/lucasschilin/schily-users-api/internal/config"
 )
 
-var DBUsers *sql.DB
-
-func ConnectDBUsers(config *config.DBUsers) {
+func ConnectDBUsers(config *config.DBUsers) *sql.DB {
 	dsn := fmt.Sprintf(
 		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		config.Username, config.Password, config.Host, config.Port, config.Name,
@@ -26,5 +24,5 @@ func ConnectDBUsers(config *config.DBUsers) {
 		log.Fatalf("users db not reachable: %v", err)
 	}
 
-	DBUsers = db
+	return db
 }

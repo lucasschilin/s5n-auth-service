@@ -10,9 +10,7 @@ import (
 	"github.com/lucasschilin/schily-users-api/internal/config"
 )
 
-var DBAuth *sql.DB
-
-func ConnectDBAuth(config *config.DBAuth) {
+func ConnectDBAuth(config *config.DBAuth) *sql.DB {
 	dsn := fmt.Sprintf(
 		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		config.Username, config.Password, config.Host, config.Port, config.Name,
@@ -26,5 +24,5 @@ func ConnectDBAuth(config *config.DBAuth) {
 		log.Fatalf("auth db not reachable: %v", err)
 	}
 
-	DBUsers = db
+	return db
 }

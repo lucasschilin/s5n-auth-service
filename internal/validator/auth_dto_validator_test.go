@@ -1,0 +1,67 @@
+package validator_test
+
+import (
+	"testing"
+
+	"github.com/lucasschilin/schily-users-api/internal/dto"
+	"github.com/lucasschilin/schily-users-api/internal/validator"
+)
+
+func TestIsValidAuthSignupRequest(t *testing.T) {
+	tests := []struct {
+		name           string
+		input          *dto.AuthSignupRequest
+		expectedVal    bool
+		expectedDetail string
+	}{
+		{
+			name: "Valid Request",
+			input: &dto.AuthSignupRequest{
+				Email:           "user@test.com",
+				Password:        "12345678",
+				ConfirmPassword: "12345678",
+			},
+			expectedVal:    true,
+			expectedDetail: "",
+		},
+		{
+			name: "Missing Email",
+			input: &dto.AuthSignupRequest{
+				Password:        "12345678",
+				ConfirmPassword: "12345678",
+			},
+			expectedVal:    false,
+			expectedDetail: "Email is required.",
+		},
+		{
+			name: "Missing Password",
+			input: &dto.AuthSignupRequest{
+				Email:           "user@test.com",
+				ConfirmPassword: "12345678",
+			},
+			expectedVal:    false,
+			expectedDetail: "Password is required.",
+		},
+		{
+			name: "Missing Confirm Password",
+			input: &dto.AuthSignupRequest{
+				Email:    "user@test.com",
+				Password: "12345678",
+			},
+			expectedVal:    false,
+			expectedDetail: "Confirmation password is required.",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			gotVal, gotDetail := validator.IsValidAuthSignupRequest(test.input)
+			if gotVal != test.expectedVal || gotDetail != test.expectedDetail {
+				t.Errorf(
+					"IsValidAuthSignupRequest() = (%v, %v), expected (%v, %v)",
+					gotVal, gotDetail, test.expectedVal, test.expectedDetail,
+				)
+			}
+		})
+	}
+}

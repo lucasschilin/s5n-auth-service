@@ -1,1 +1,1 @@
-ALTER DATABASE db_users SET timezone TO 'UTC';
+ALTER DATABASE db_auth SET timezone TO 'UTC';

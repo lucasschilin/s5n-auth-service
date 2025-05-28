@@ -10,6 +10,7 @@ type Config struct {
 	API     *API
 	DBUsers *DBUsers
 	DBAuth  *DBAuth
+	JWT     *JWT
 }
 
 type API struct {
@@ -31,6 +32,9 @@ type DBAuth struct {
 	Username string
 	Password string
 	Name     string
+}
+type JWT struct {
+	SecretKey string
 }
 
 func Load() *Config {
@@ -54,11 +58,15 @@ func Load() *Config {
 		Port:     os.Getenv("DB_AUTH_PORT"),
 		Name:     os.Getenv("DB_AUTH_NAME"),
 	}
+	JWTConfig := JWT{
+		SecretKey: os.Getenv("JWT_SECRET_KEY"),
+	}
 
 	return &Config{
 		API:     &APIConfig,
 		DBUsers: &DBUsersConfig,
 		DBAuth:  &DBAuthConfig,
+		JWT:     &JWTConfig,
 	}
 
 }
