@@ -5,11 +5,11 @@ export
 
 # START::APP COMMANDS
 
-# Executa os testes automatizados no modo verboso
+# Executa os testes
 test: 
-	go test ./... $(ARGS)
+	go test ./...
 
-# Executa os testes automatizados no modo verboso e cria um .html de coverage
+# Executa os testes no modo verboso e cria um .html de coverage
 test-cov: 
 	go test -coverprofile cover.out ./... -v && go tool cover -html=cover.out -o coverage.html
 

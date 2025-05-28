@@ -15,6 +15,7 @@ func ConnectDBUsers(config *config.DBUsers) *sql.DB {
 		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		config.Username, config.Password, config.Host, config.Port, config.Name,
 	)
+	fmt.Println("TESTE: " + dsn)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalf("failed to connect to users db: %v", err)

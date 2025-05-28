@@ -79,7 +79,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	if !validator.IsValidEmailAddress(req.Email) {
 		return nil, errorResponse(
-			http.StatusBadRequest, "Email must be a valid address",
+			http.StatusUnprocessableEntity, "Email must be a valid address",
 		)
 	}
 
