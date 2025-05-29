@@ -16,6 +16,7 @@ func Setup(
 	r.HandleFunc("/", rootHand.Root).Methods(http.MethodGet)
 
 	r.HandleFunc("/auth/signup", authHand.Signup).Methods(http.MethodPost)
+	r.HandleFunc("/auth/login", authHand.Login).Methods(http.MethodPost)
 
 	return r
 }

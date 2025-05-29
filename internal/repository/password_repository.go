@@ -8,8 +8,9 @@ import (
 
 type PasswordRepository interface {
 	CreateWithTX(
-		tx *sql.Tx, userID *string, password string,
+		tx *sql.Tx, userID string, password string,
 	) (*model.Password, error)
+	GetByUser(userID string) (*model.Password, error)
 }
 
 type passwordRepository struct {
@@ -23,7 +24,7 @@ func NewPasswordRepository(db *sql.DB) PasswordRepository {
 }
 
 func (r *passwordRepository) CreateWithTX(
-	tx *sql.Tx, userID *string, password string,
+	tx *sql.Tx, userID string, password string,
 ) (*model.Password, error) {
 	var newPassword model.Password
 
@@ -40,4 +41,26 @@ func (r *passwordRepository) CreateWithTX(
 	}
 
 	return &newPassword, nil
+}
+
+func (r *passwordRepository) GetByUser(
+	userID string,
+) (*model.Password, error) {
+	var password model.Password
+
+	if err := r.DB.QueryRow(
+		`SELECT * FROM passwords WHERE "user" = $1`,
+		userID,
+	).Scan(
+		&password.User,
+		&password.Password,
+		&password.CreatedAt,
+		&password.UpdatedAt,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+	}
+
+	return &password, nil
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
@@ -18,7 +17,10 @@ import (
 
 type AuthService interface {
 	Signup(req *dto.AuthSignupRequest) (
-		*dto.AuthSignupResponse, *dto.DefaultError,
+		*dto.AuthLoginResponse, *dto.DefaultError,
+	)
+	Login(req *dto.AuthLoginRequest) (
+		*dto.AuthLoginResponse, *dto.DefaultError,
 	)
 }
 
@@ -28,7 +30,7 @@ type authService struct {
 	UserRepository      repository.UserRepository
 	UserEmailRepository repository.UserEmailRepository
 	PasswordRepository  repository.PasswordRepository
-	JWTAdapter          port.JWT
+	JWTPort             port.JWT
 }
 
 func NewAuthService(
@@ -37,7 +39,7 @@ func NewAuthService(
 	userRepo repository.UserRepository,
 	userEmailRepo repository.UserEmailRepository,
 	passwordRepo repository.PasswordRepository,
-	jwtAdapter port.JWT,
+	jwtPort port.JWT,
 ) AuthService {
 	return &authService{
 		UsersDB:             usersDB,
@@ -45,12 +47,12 @@ func NewAuthService(
 		UserRepository:      userRepo,
 		UserEmailRepository: userEmailRepo,
 		PasswordRepository:  passwordRepo,
-		JWTAdapter:          jwtAdapter,
+		JWTPort:             jwtPort,
 	}
 }
 
 func (s *authService) Signup(req *dto.AuthSignupRequest) (
-	*dto.AuthSignupResponse, *dto.DefaultError,
+	*dto.AuthLoginResponse, *dto.DefaultError,
 ) {
 	if val, detail := validator.IsValidAuthSignupRequest(req); !val {
 		return nil, errorResponse(
@@ -95,11 +97,11 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	usersTX, err := s.UsersDB.Begin()
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	authTX, err := s.AuthDB.Begin()
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	defer usersTX.Rollback()
 	defer authTX.Rollback()
@@ -112,80 +114,129 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	username := strings.ToLower(emailUsername[:maxUsernameLength])
 	user, err := s.UserRepository.GetByUsername(&username)
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	if user != nil {
 		sufix, err := nanoid.Generate(nanoid.DefaultAlphabet, 5)
 		if err != nil {
-			return nil, errAuthSignupInternalServerError
+			return nil, errAuthInternalServerError
 		}
 		username = strings.ToLower(fmt.Sprintf("%s_%s", username, sufix))
 	}
 
 	newUser, err := s.UserRepository.CreateWithTX(usersTX, &username)
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	verifyToken, err := nanoid.Generate(nanoid.DefaultAlphabet, 50)
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	_, err = s.UserEmailRepository.CreateWithTX(
 		usersTX, &newUser.ID, &req.Email, &verifyToken,
 	)
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	_, err = s.PasswordRepository.CreateWithTX(
-		authTX, &newUser.ID, string(bcryptedPassword),
+		authTX, newUser.ID, string(bcryptedPassword),
 	)
 	if err != nil {
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
-	accessTokenExpiration := time.Now().Add(30 * time.Minute).Unix()
-	mapClaims := map[string]interface{}{
-		"iat":  time.Now().Unix(),
-		"exp":  accessTokenExpiration,
-		"sub":  newUser.ID,
-		"type": "access_token",
-	}
-	accessToken, err := s.JWTAdapter.GenerateToken(mapClaims)
+	accessToken, err := generateAccessToken(s.JWTPort, newUser.ID)
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
-	refreshTokenExpiration := time.Now().Add(24 * time.Hour).Unix()
-	mapClaims = map[string]interface{}{
-		"iat":  time.Now().Unix(),
-		"exp":  refreshTokenExpiration,
-		"sub":  newUser.ID,
-		"type": "refresh_token",
-	}
-	refreshToken, err := s.JWTAdapter.GenerateToken(mapClaims)
+	refreshToken, err := generateRefreshToken(s.JWTPort, newUser.ID)
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil, errAuthSignupInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	usersTX.Commit()
 	authTX.Commit()
 
-	return &dto.AuthSignupResponse{
-		User: dto.AuthSignupUserResponse{
+	return &dto.AuthLoginResponse{
+		User: struct {
+			ID       string `json:"id"`
+			Username string `json:"username"`
+		}{
 			ID:       newUser.ID,
 			Username: newUser.Username,
 		},
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (s *authService) Login(req *dto.AuthLoginRequest) (
+	*dto.AuthLoginResponse, *dto.DefaultError,
+) {
+	if val, detail := validator.IsValidAuthLoginRequest(req); !val {
+		return nil, errorResponse(
+			http.StatusUnprocessableEntity,
+			detail,
+		)
+	}
+
+	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+	if userEmail == nil {
+		return nil, errAuthLoginInvalidCredentials
+	}
+
+	password, err := s.PasswordRepository.GetByUser(userEmail.User)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+	if password == nil {
+		return nil, errAuthLoginInvalidCredentials
+	}
+
+	if err = bcrypt.CompareHashAndPassword(
+		[]byte(password.Password),
+		[]byte(req.Password),
+	); err != nil {
+		return nil, errAuthLoginInvalidCredentials
+	}
+
+	accessToken, err := generateAccessToken(s.JWTPort, userEmail.User)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	refreshToken, err := generateRefreshToken(s.JWTPort, userEmail.User)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	user, err := s.UserRepository.GetByID(&userEmail.User)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	return &dto.AuthLoginResponse{
+		User: struct {
+			ID       string `json:"id"`
+			Username string `json:"username"`
+		}{
+			ID:       user.ID,
+			Username: user.Username,
+		},
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+
 }
