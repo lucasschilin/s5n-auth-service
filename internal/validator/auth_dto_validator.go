@@ -19,3 +19,15 @@ func IsValidAuthSignupRequest(req *dto.AuthSignupRequest) (bool, string) {
 
 	return true, ""
 }
+
+func IsValidAuthLoginRequest(req *dto.AuthLoginRequest) (bool, string) {
+	if req.Email == "" {
+		return false, "Email is required."
+	}
+
+	if req.Password == "" {
+		return false, "Password is required."
+	}
+
+	return true, ""
+}

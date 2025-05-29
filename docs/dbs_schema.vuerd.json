@@ -4,8 +4,8 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -215.1019,
-    "scrollLeft": -180.1216,
+    "scrollTop": -219.3196,
+    "scrollLeft": -87.3325,
     "zoomLevel": 0.85,
     "show": 431,
     "database": 16,
@@ -649,23 +649,6 @@
     },
     "indexEntities": {},
     "indexColumnEntities": {},
-    "memoEntities": {
-      "iWM3Z-I3u1RhKJ6KNGTVI": {
-        "id": "iWM3Z-I3u1RhKJ6KNGTVI",
-        "value": "",
-        "ui": {
-          "x": 250,
-          "y": 150,
-          "zIndex": 5,
-          "width": 302,
-          "height": 100,
-          "color": ""
-        },
-        "meta": {
-          "updateAt": 1747515156937,
-          "createAt": 1747515133292
-        }
-      }
-    }
+    "memoEntities": {}
   }
 }
