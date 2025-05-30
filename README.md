@@ -1,5 +1,5 @@
-# schily-users-api
-**Schily Users API** é o microserviço de autenticação e manipulação de usuários da aplicação **Schily**.
+# s5n-auth-service
+**S5N Auth Service** é o microserviço de autenticação e manipulação de usuários do projeto **S5N**.
 
 ## 🧰 Tecnologias utilizadas
 - **Go 1.24**
