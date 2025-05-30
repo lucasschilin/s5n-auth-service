@@ -1,5 +1,5 @@
 # s5n-auth-service
-**S5N Auth Service** é o microserviço de autenticação e manipulação de usuários do projeto **S5N**.
+**S5N Auth Service** é o microserviço de autenticação e gerenciamento de usuários do projeto **S5N**.
 
 ## 🧰 Tecnologias utilizadas
 - **Go 1.24**
