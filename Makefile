@@ -26,15 +26,15 @@ build:
 
 # Sobe os containers com base no docker-compose.yml
 docker-compose-up:
-	sudo docker compose up -d
+	docker compose up -d
 
 # Derruba os containers com base no docker-compose.yml
 docker-compose-down:
-	sudo docker compose down
+	docker compose down
 
 # Mostra os logs em tempo real dos containers definidos no docker-compose.yml
 docker-compose-logs:
-	sudo docker compose logs -f
+	docker compose logs -f
 
 # END::DOCKER-COMPOSE COMMANDS
 # START::GOLANG-MIGRATE COMMANDS
