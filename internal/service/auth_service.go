@@ -58,10 +58,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	*dto.AuthLoginResponse, *dto.DefaultError,
 ) {
 	if val, detail := validator.IsValidAuthSignupRequest(req); !val {
-		return nil, errorResponse(
-			http.StatusUnprocessableEntity,
-			detail,
-		)
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
 	const MinPasswordLength = 8
@@ -186,10 +183,7 @@ func (s *authService) Login(req *dto.AuthLoginRequest) (
 	*dto.AuthLoginResponse, *dto.DefaultError,
 ) {
 	if val, detail := validator.IsValidAuthLoginRequest(req); !val {
-		return nil, errorResponse(
-			http.StatusUnprocessableEntity,
-			detail,
-		)
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
 	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
@@ -247,7 +241,36 @@ func (s *authService) Login(req *dto.AuthLoginRequest) (
 func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 	*dto.AuthRefreshResponse, *dto.DefaultError,
 ) {
+	if val, detail := validator.IsValidAuthRefreshRequest(req); !val {
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
+	}
+
+	refreshTokenClaims, err := s.JWTPort.ValidateToken(req.RefreshToken)
+	if err != nil {
+		return nil, errAuthInvalidToken
+	}
+
+	sub, exists := refreshTokenClaims["sub"]
+	if !exists {
+		return nil, errAuthInvalidToken
+	}
+
+	userID, ok := sub.(string)
+	if !ok {
+		return nil, errAuthInvalidToken
+	}
+
+	user, _ := s.UserRepository.GetByID(&userID)
+	if user == nil {
+		return nil, errAuthInvalidToken
+	}
+
+	accessToken, err := generateAccessToken(s.JWTPort, user.ID)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+
 	return &dto.AuthRefreshResponse{
-		AccessToken: "ACCESS_TOKEN",
+		AccessToken: accessToken,
 	}, nil
 }

@@ -16,4 +16,5 @@ func errorResponse(code int, detail string) *dto.DefaultError {
 var (
 	errAuthInternalServerError     = errorResponse(http.StatusInternalServerError, "An error occurred.")
 	errAuthLoginInvalidCredentials = errorResponse(http.StatusUnauthorized, "Invalid credentials.")
+	errAuthInvalidToken            = errorResponse(http.StatusUnauthorized, "Invalid token.")
 )

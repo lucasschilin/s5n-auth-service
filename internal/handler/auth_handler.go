@@ -80,15 +80,15 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// res, err := h.AuthService.Login(req)
-	// if err != nil {
-	// 	w.WriteHeader(err.Code)
-	// 	json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
-	// 		Detail: err.Detail,
-	// 	})
-	// 	return
-	// }
+	res, err := h.AuthService.Refresh(req)
+	if err != nil {
+		w.WriteHeader(err.Code)
+		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+			Detail: err.Detail,
+		})
+		return
+	}
 
-	// w.WriteHeader(http.StatusOK)
-	// json.NewEncoder(w).Encode(res)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }

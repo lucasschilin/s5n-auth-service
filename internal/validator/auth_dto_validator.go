@@ -31,3 +31,11 @@ func IsValidAuthLoginRequest(req *dto.AuthLoginRequest) (bool, string) {
 
 	return true, ""
 }
+
+func IsValidAuthRefreshRequest(req *dto.AuthRefreshRequest) (bool, string) {
+	if req.RefreshToken == "" {
+		return false, "Refresh token is required."
+	}
+
+	return true, ""
+}
