@@ -7,8 +7,7 @@ import (
 )
 
 func generateAccessToken(jwtPort port.JWT, userID string) (string, error) {
-	// expiration := time.Now().Add(15 * time.Minute).Unix()
-	expiration := time.Now().Add(15 * time.Second).Unix()
+	expiration := time.Now().Add(15 * time.Minute).Unix()
 	mapClaims := map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"exp":  expiration,
@@ -19,8 +18,7 @@ func generateAccessToken(jwtPort port.JWT, userID string) (string, error) {
 }
 
 func generateRefreshToken(jwtPort port.JWT, userID string) (string, error) {
-	// expiration := time.Now().Add(1 * time.Hour).Unix()
-	expiration := time.Now().Add(1 * time.Minute).Unix()
+	expiration := time.Now().Add(90 * time.Minute).Unix()
 	mapClaims := map[string]interface{}{
 		"iat":  time.Now().Unix(),
 		"exp":  expiration,
