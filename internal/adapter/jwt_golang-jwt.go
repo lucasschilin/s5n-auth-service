@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"fmt"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lucasschilin/schily-users-api/internal/port"
 )
@@ -29,4 +31,25 @@ func (j *JWT) GenerateToken(claims map[string]interface{}) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (j *JWT) ValidateToken(token string) (map[string]interface{}, error) {
+
+	claims := jwt.MapClaims{}
+
+	keyFunc := func(token *jwt.Token) (interface{}, error) {
+		return []byte(j.secretKey), nil
+	}
+
+	parsedToken, err := jwt.ParseWithClaims(token, claims, keyFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	if !parsedToken.Valid {
+		return nil, fmt.Errorf("Invalid Token")
+	}
+
+	return claims, nil
+
 }

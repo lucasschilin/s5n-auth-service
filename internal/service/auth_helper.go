@@ -7,10 +7,11 @@ import (
 )
 
 func generateAccessToken(jwtPort port.JWT, userID string) (string, error) {
-	accessTokenExpiration := time.Now().Add(30 * time.Minute).Unix()
+	// expiration := time.Now().Add(15 * time.Minute).Unix()
+	expiration := time.Now().Add(15 * time.Second).Unix()
 	mapClaims := map[string]interface{}{
 		"iat":  time.Now().Unix(),
-		"exp":  accessTokenExpiration,
+		"exp":  expiration,
 		"sub":  userID,
 		"type": "access_token",
 	}
@@ -18,12 +19,13 @@ func generateAccessToken(jwtPort port.JWT, userID string) (string, error) {
 }
 
 func generateRefreshToken(jwtPort port.JWT, userID string) (string, error) {
-	accessTokenExpiration := time.Now().Add(30 * time.Minute).Unix()
+	// expiration := time.Now().Add(1 * time.Hour).Unix()
+	expiration := time.Now().Add(1 * time.Minute).Unix()
 	mapClaims := map[string]interface{}{
 		"iat":  time.Now().Unix(),
-		"exp":  accessTokenExpiration,
+		"exp":  expiration,
 		"sub":  userID,
-		"type": "access_token",
+		"type": "refresh_token",
 	}
 	return jwtPort.GenerateToken(mapClaims)
 }
