@@ -22,6 +22,9 @@ type AuthService interface {
 	Login(req *dto.AuthLoginRequest) (
 		*dto.AuthLoginResponse, *dto.DefaultError,
 	)
+	Refresh(req *dto.AuthRefreshRequest) (
+		*dto.AuthRefreshResponse, *dto.DefaultError,
+	)
 }
 
 type authService struct {
@@ -239,4 +242,12 @@ func (s *authService) Login(req *dto.AuthLoginRequest) (
 		RefreshToken: refreshToken,
 	}, nil
 
+}
+
+func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
+	*dto.AuthRefreshResponse, *dto.DefaultError,
+) {
+	return &dto.AuthRefreshResponse{
+		AccessToken: "ACCESS_TOKEN",
+	}, nil
 }

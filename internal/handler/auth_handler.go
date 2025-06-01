@@ -11,6 +11,7 @@ import (
 type AuthHandler interface {
 	Signup(w http.ResponseWriter, r *http.Request)
 	Login(w http.ResponseWriter, r *http.Request)
+	Refresh(w http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
@@ -67,4 +68,27 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
+}
+
+func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	var req *dto.AuthRefreshRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+			Detail: "The server cannot process your request.",
+		})
+		return
+	}
+
+	// res, err := h.AuthService.Login(req)
+	// if err != nil {
+	// 	w.WriteHeader(err.Code)
+	// 	json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+	// 		Detail: err.Detail,
+	// 	})
+	// 	return
+	// }
+
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(res)
 }
