@@ -25,6 +25,7 @@ type AuthService interface {
 	Refresh(req *dto.AuthRefreshRequest) (
 		*dto.AuthRefreshResponse, *dto.DefaultError,
 	)
+	ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError
 }
 
 type authService struct {
@@ -273,4 +274,22 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 	return &dto.AuthRefreshResponse{
 		AccessToken: accessToken,
 	}, nil
+}
+
+func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError {
+	if val, detail := validator.IsValidAuthForgotPasswordRequest(req); !val {
+		return errorResponse(http.StatusUnprocessableEntity, detail)
+	}
+
+	if !validator.IsValidEmailAddress(req.Email) {
+		return errorResponse(
+			http.StatusUnprocessableEntity, "Email must be a valid address",
+		)
+	}
+
+	//TODO: validar se url está entre as urls permitidas para envio
+	//TODO: buscar usuario por email
+	//TODO: enviar email com link
+
+	return nil
 }
