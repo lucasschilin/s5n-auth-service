@@ -12,6 +12,7 @@ import (
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/port"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
+	"github.com/lucasschilin/schily-users-api/internal/util"
 	"github.com/lucasschilin/schily-users-api/internal/validator"
 )
 
@@ -287,7 +288,20 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		)
 	}
 
-	//TODO: validar se url está entre as urls permitidas para envio
+	allowedRedirectHosts := []string{"s5n.com.br"}
+
+	redirectUrlWithoutHttp := strings.ReplaceAll(strings.ToLower(req.RedirectUrl), "http://", "")
+	redirectUrlWithoutHttp = strings.ReplaceAll(redirectUrlWithoutHttp, "https://", "")
+	redirectUrlHost := strings.Split(redirectUrlWithoutHttp, "/")[0]
+
+	finded, _ := util.InStringSlice(allowedRedirectHosts, redirectUrlHost)
+	if !finded {
+		return errorResponse(
+			http.StatusUnprocessableEntity,
+			"Redirect URL must be a valid and allowed URL",
+		)
+	}
+
 	//TODO: buscar usuario por email
 	//TODO: enviar email com link
 
