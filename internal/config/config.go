@@ -11,6 +11,7 @@ type Config struct {
 	DBUsers *DBUsers
 	DBAuth  *DBAuth
 	JWT     *JWT
+	SMTP    *SMTP
 }
 
 type API struct {
@@ -35,6 +36,13 @@ type DBAuth struct {
 }
 type JWT struct {
 	SecretKey string
+}
+type SMTP struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	From     string
 }
 
 func Load() *Config {
@@ -61,12 +69,20 @@ func Load() *Config {
 	JWTConfig := JWT{
 		SecretKey: os.Getenv("JWT_SECRET_KEY"),
 	}
+	SMTPConfig := SMTP{
+		Host:     os.Getenv("SMTP_HOST"),
+		Port:     os.Getenv("SMTP_PORT"),
+		Username: os.Getenv("SMTP_USERNAME"),
+		Password: os.Getenv("SMTP_PASSWORD"),
+		From:     os.Getenv("SMTP_FROM"),
+	}
 
 	return &Config{
 		API:     &APIConfig,
 		DBUsers: &DBUsersConfig,
 		DBAuth:  &DBAuthConfig,
 		JWT:     &JWTConfig,
+		SMTP:    &SMTPConfig,
 	}
 
 }

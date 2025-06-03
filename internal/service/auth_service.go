@@ -3,12 +3,15 @@ package service
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"net/smtp"
 	"strings"
 
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/port"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
@@ -318,7 +321,42 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		return nil
 	}
 
-	//TODO: enviar email com link
+	cfg := config.Load()
+
+	auth := smtp.PlainAuth(
+		"", cfg.SMTP.Username,
+		cfg.SMTP.Password, cfg.SMTP.Host,
+	)
+	fmt.Println(auth)
+
+	to := []string{
+		userEmail.Address,
+	}
+	header := "" +
+		"Subject: Teste 4\n" +
+		fmt.Sprintf("To: %s\n", strings.Join(to, ",")) +
+		"MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+
+	corpo := fmt.Sprintf(`
+		<html>
+			<body>
+				<p>Email de %s</p>
+			</body>
+		</html>
+	`, "teste 4")
+
+	msg := []byte(header + corpo)
+	err = smtp.SendMail(
+		cfg.SMTP.Host+":"+cfg.SMTP.Port, auth, cfg.SMTP.From, to, msg,
+	)
+	if err != nil {
+		log.Fatalf("Erro ao enviar email: %v", err)
+		return errAuthInternalServerError
+	}
+
+	//TODO: criar port and adapter para email e abstrair logica de envio
+	//TODO: gerar código
+	//TODO: fazer envio
 
 	return nil
 }
