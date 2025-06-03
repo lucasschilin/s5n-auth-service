@@ -302,7 +302,22 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		)
 	}
 
-	//TODO: buscar usuario por email
+	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
+	if err != nil {
+		return errAuthInternalServerError
+	}
+	if userEmail == nil {
+		return nil
+	}
+
+	user, err := s.UserRepository.GetByID(&userEmail.User)
+	if err != nil {
+		return errAuthInternalServerError
+	}
+	if user == nil {
+		return nil
+	}
+
 	//TODO: enviar email com link
 
 	return nil
