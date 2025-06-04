@@ -78,13 +78,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		)
 	}
 
-	if req.Password != req.ConfirmPassword {
-		return nil, errorResponse(
-			http.StatusUnprocessableEntity,
-			"Password and confirmation password must match.",
-		)
-	}
-
 	if !validator.IsValidEmailAddress(req.Email) {
 		return nil, errorResponse(
 			http.StatusUnprocessableEntity, "Email must be a valid address",

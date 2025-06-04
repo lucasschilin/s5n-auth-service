@@ -13,10 +13,6 @@ func IsValidAuthSignupRequest(req *dto.AuthSignupRequest) (bool, string) {
 		return false, "Password is required."
 	}
 
-	if req.ConfirmPassword == "" {
-		return false, "Confirmation password is required."
-	}
-
 	return true, ""
 }
 
