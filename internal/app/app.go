@@ -21,9 +21,14 @@ func InitializeApp(config *config.Config) http.Handler {
 	passwordRepo := repository.NewPasswordRepository(authDB)
 
 	jwtAdapter := adapter.NewJWT(config.JWT.SecretKey)
+	mailerAdapter := adapter.NewSMTPMailer(
+		&config.SMTP.Host, &config.SMTP.Port, &config.SMTP.Username,
+		&config.SMTP.Password, &config.SMTP.From,
+	)
 
 	authServ := service.NewAuthService(
-		usersDB, authDB, userRepo, userEmailRepo, passwordRepo, jwtAdapter,
+		usersDB, authDB, userRepo, userEmailRepo,
+		passwordRepo, jwtAdapter, mailerAdapter,
 	)
 
 	authHand := handler.NewAuthHandler(authServ)

@@ -3,15 +3,12 @@ package service
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
-	"net/smtp"
 	"strings"
 
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/lucasschilin/schily-users-api/internal/config"
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/port"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
@@ -39,6 +36,7 @@ type authService struct {
 	UserEmailRepository repository.UserEmailRepository
 	PasswordRepository  repository.PasswordRepository
 	JWTPort             port.JWT
+	MailerPort          port.Mailer
 }
 
 func NewAuthService(
@@ -48,6 +46,8 @@ func NewAuthService(
 	userEmailRepo repository.UserEmailRepository,
 	passwordRepo repository.PasswordRepository,
 	jwtPort port.JWT,
+	mailerPort port.Mailer,
+
 ) AuthService {
 	return &authService{
 		UsersDB:             usersDB,
@@ -56,6 +56,7 @@ func NewAuthService(
 		UserEmailRepository: userEmailRepo,
 		PasswordRepository:  passwordRepo,
 		JWTPort:             jwtPort,
+		MailerPort:          mailerPort,
 	}
 }
 
@@ -321,40 +322,19 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		return nil
 	}
 
-	cfg := config.Load()
+	subject := "Mais um email de teste"
+	body := "<div>Testes apenas</div>"
 
-	auth := smtp.PlainAuth(
-		"", cfg.SMTP.Username,
-		cfg.SMTP.Password, cfg.SMTP.Host,
-	)
-	fmt.Println(auth)
-
-	to := []string{
-		userEmail.Address,
-	}
-	header := "" +
-		"Subject: Teste 4\n" +
-		fmt.Sprintf("To: %s\n", strings.Join(to, ",")) +
-		"MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-
-	corpo := fmt.Sprintf(`
-		<html>
-			<body>
-				<p>Email de %s</p>
-			</body>
-		</html>
-	`, "teste 4")
-
-	msg := []byte(header + corpo)
-	err = smtp.SendMail(
-		cfg.SMTP.Host+":"+cfg.SMTP.Port, auth, cfg.SMTP.From, to, msg,
-	)
+	err = s.MailerPort.NewMessage().
+		Subject(&subject).
+		Body(&body).
+		To(&[]string{userEmail.Address, "schilin.lucas@gmail.com"}).
+		Send()
 	if err != nil {
-		log.Fatalf("Erro ao enviar email: %v", err)
+		fmt.Printf("Erro ao enviar email: %v\n", err)
 		return errAuthInternalServerError
 	}
 
-	//TODO: criar port and adapter para email e abstrair logica de envio
 	//TODO: gerar código
 	//TODO: fazer envio
 
