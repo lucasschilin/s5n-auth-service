@@ -17,9 +17,8 @@ func TestIsValidAuthSignupRequest(t *testing.T) {
 		{
 			name: "Valid Request",
 			input: &dto.AuthSignupRequest{
-				Email:           "user@test.com",
-				Password:        "12345678",
-				ConfirmPassword: "12345678",
+				Email:    "user@test.com",
+				Password: "12345678",
 			},
 			expectedVal:    true,
 			expectedDetail: "",
@@ -27,8 +26,7 @@ func TestIsValidAuthSignupRequest(t *testing.T) {
 		{
 			name: "Missing Email",
 			input: &dto.AuthSignupRequest{
-				Password:        "12345678",
-				ConfirmPassword: "12345678",
+				Password: "12345678",
 			},
 			expectedVal:    false,
 			expectedDetail: "Email is required.",
@@ -36,20 +34,10 @@ func TestIsValidAuthSignupRequest(t *testing.T) {
 		{
 			name: "Missing Password",
 			input: &dto.AuthSignupRequest{
-				Email:           "user@test.com",
-				ConfirmPassword: "12345678",
+				Email: "user@test.com",
 			},
 			expectedVal:    false,
 			expectedDetail: "Password is required.",
-		},
-		{
-			name: "Missing Confirm Password",
-			input: &dto.AuthSignupRequest{
-				Email:    "user@test.com",
-				Password: "12345678",
-			},
-			expectedVal:    false,
-			expectedDetail: "Confirmation password is required.",
 		},
 	}
 
