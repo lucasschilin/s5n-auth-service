@@ -47,7 +47,7 @@ func (j *JWT) ValidateToken(token string) (map[string]interface{}, error) {
 	}
 
 	if !parsedToken.Valid {
-		return nil, fmt.Errorf("Invalid Token")
+		return nil, fmt.Errorf("invalid token")
 	}
 
 	return claims, nil

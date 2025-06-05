@@ -35,3 +35,15 @@ func IsValidAuthRefreshRequest(req *dto.AuthRefreshRequest) (bool, string) {
 
 	return true, ""
 }
+
+func IsValidAuthForgotPasswordRequest(req *dto.AuthForgotPasswordRequest) (bool, string) {
+	if req.Email == "" {
+		return false, "Email is required."
+	}
+
+	if req.RedirectUrl == "" {
+		return false, "Redirect URL is required."
+	}
+
+	return true, ""
+}

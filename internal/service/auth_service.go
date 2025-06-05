@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
@@ -12,6 +13,7 @@ import (
 	"github.com/lucasschilin/schily-users-api/internal/dto"
 	"github.com/lucasschilin/schily-users-api/internal/port"
 	"github.com/lucasschilin/schily-users-api/internal/repository"
+	"github.com/lucasschilin/schily-users-api/internal/util"
 	"github.com/lucasschilin/schily-users-api/internal/validator"
 )
 
@@ -25,6 +27,7 @@ type AuthService interface {
 	Refresh(req *dto.AuthRefreshRequest) (
 		*dto.AuthRefreshResponse, *dto.DefaultError,
 	)
+	ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError
 }
 
 type authService struct {
@@ -34,6 +37,7 @@ type authService struct {
 	UserEmailRepository repository.UserEmailRepository
 	PasswordRepository  repository.PasswordRepository
 	JWTPort             port.JWT
+	MailerPort          port.Mailer
 }
 
 func NewAuthService(
@@ -43,6 +47,8 @@ func NewAuthService(
 	userEmailRepo repository.UserEmailRepository,
 	passwordRepo repository.PasswordRepository,
 	jwtPort port.JWT,
+	mailerPort port.Mailer,
+
 ) AuthService {
 	return &authService{
 		UsersDB:             usersDB,
@@ -51,6 +57,7 @@ func NewAuthService(
 		UserEmailRepository: userEmailRepo,
 		PasswordRepository:  passwordRepo,
 		JWTPort:             jwtPort,
+		MailerPort:          mailerPort,
 	}
 }
 
@@ -266,4 +273,73 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 	return &dto.AuthRefreshResponse{
 		AccessToken: accessToken,
 	}, nil
+}
+
+func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError {
+	if val, detail := validator.IsValidAuthForgotPasswordRequest(req); !val {
+		return errorResponse(http.StatusUnprocessableEntity, detail)
+	}
+
+	if !validator.IsValidEmailAddress(req.Email) {
+		return errorResponse(
+			http.StatusUnprocessableEntity, "Email must be a valid address",
+		)
+	}
+
+	allowedRedirectHosts := []string{"s5n.com.br"}
+
+	redirectUrlWithoutHttp := strings.ReplaceAll(strings.ToLower(req.RedirectUrl), "http://", "")
+	redirectUrlWithoutHttp = strings.ReplaceAll(redirectUrlWithoutHttp, "https://", "")
+	redirectUrlHost := strings.Split(redirectUrlWithoutHttp, "/")[0]
+
+	finded, _ := util.InStringSlice(allowedRedirectHosts, redirectUrlHost)
+	if !finded {
+		return errorResponse(
+			http.StatusUnprocessableEntity,
+			"Redirect URL must be a valid and allowed URL",
+		)
+	}
+
+	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
+	if err != nil {
+		return errAuthInternalServerError
+	}
+	if userEmail == nil {
+		return nil
+	}
+
+	user, err := s.UserRepository.GetByID(&userEmail.User)
+	if err != nil {
+		return errAuthInternalServerError
+	}
+	if user == nil {
+		return nil
+	}
+
+	exp := time.Now().Add(5 * time.Minute).Unix()
+	token, err := generateToken(s.JWTPort, "reset_password", int(exp), user.ID)
+	if err != nil {
+		return errAuthInternalServerError
+	}
+
+	link := req.RedirectUrl + "?t=" + token
+
+	subject := "🔐 Recupere o acesso à sua conta – redefina sua senha"
+	body := fmt.Sprintf(`<p>Olá %s, como vai?</p>
+			<div>
+				<p>Para redefinir sua senha e recuperar sua conta, copie e cole este link no seu navegador:</p>
+				<p>%s/p>
+			</div>`, user.Username, link)
+
+	err = s.MailerPort.NewMessage().
+		Subject(&subject).
+		Body(&body).
+		To(&[]string{userEmail.Address}).
+		Send()
+	if err != nil {
+		fmt.Printf("Erro ao enviar email: %v\n", err)
+		return errAuthInternalServerError
+	}
+
+	return nil
 }

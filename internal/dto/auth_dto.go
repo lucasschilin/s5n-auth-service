@@ -26,3 +26,8 @@ type AuthRefreshRequest struct {
 type AuthRefreshResponse struct {
 	AccessToken string `json:"access_token"`
 }
+
+type AuthForgotPasswordRequest struct {
+	Email       string `json:"email"`
+	RedirectUrl string `json:"redirect_url"`
+}
