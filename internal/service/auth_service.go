@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
@@ -315,21 +316,30 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		return nil
 	}
 
-	subject := "Mais um email de teste"
-	body := "<div>Testes apenas</div>"
+	exp := time.Now().Add(5 * time.Minute).Unix()
+	token, err := generateToken(s.JWTPort, "reset_password", int(exp), user.ID)
+	if err != nil {
+		return errAuthInternalServerError
+	}
+
+	link := req.RedirectUrl + "?t=" + token
+
+	subject := "🔐 Recupere o acesso à sua conta – redefina sua senha"
+	body := fmt.Sprintf(`<p>Olá %s, como vai?</p>
+			<div>
+				<p>Para redefinir sua senha e recuperar sua conta, copie e cole este link no seu navegador:</p>
+				<p>%s/p>
+			</div>`, user.Username, link)
 
 	err = s.MailerPort.NewMessage().
 		Subject(&subject).
 		Body(&body).
-		To(&[]string{userEmail.Address, "schilin.lucas@gmail.com"}).
+		To(&[]string{userEmail.Address}).
 		Send()
 	if err != nil {
 		fmt.Printf("Erro ao enviar email: %v\n", err)
 		return errAuthInternalServerError
 	}
-
-	//TODO: gerar código
-	//TODO: fazer envio
 
 	return nil
 }
