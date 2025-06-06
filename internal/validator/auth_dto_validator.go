@@ -47,3 +47,15 @@ func IsValidAuthForgotPasswordRequest(req *dto.AuthForgotPasswordRequest) (bool,
 
 	return true, ""
 }
+
+func IsValidAuthResetPasswordRequest(req *dto.AuthResetPasswordRequest) (bool, string) {
+	if req.ResetToken == "" {
+		return false, "Reset token is required."
+	}
+
+	if req.NewPassword == "" {
+		return false, "New password is required."
+	}
+
+	return true, ""
+}

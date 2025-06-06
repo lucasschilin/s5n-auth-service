@@ -19,7 +19,7 @@ func Setup(
 	r.HandleFunc("/auth/login", authHand.Login).Methods(http.MethodPost)
 	r.HandleFunc("/auth/refresh", authHand.Refresh).Methods(http.MethodPost)
 	r.HandleFunc("/auth/forgot-password", authHand.ForgotPassword).Methods(http.MethodPost)
-	// TODO: r.HandleFunc("/auth/reset-password", authHand.ResetPassword).Methods(http.MethodPost)
+	r.HandleFunc("/auth/reset-password", authHand.ResetPassword).Methods(http.MethodPost)
 
 	return r
 }

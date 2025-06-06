@@ -30,6 +30,9 @@ type AuthService interface {
 	ForgotPassword(req *dto.AuthForgotPasswordRequest) (
 		*dto.DefaultMessageResponse, *dto.DefaultError,
 	)
+	ResetPassword(req *dto.AuthResetPasswordRequest) (
+		*dto.DefaultMessageResponse, *dto.DefaultError,
+	)
 }
 
 type authService struct {
@@ -277,7 +280,9 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 	}, nil
 }
 
-func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (*dto.DefaultMessageResponse, *dto.DefaultError) {
+func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (
+	*dto.DefaultMessageResponse, *dto.DefaultError,
+) {
 	messageResponse := dto.DefaultMessageResponse{
 		Message: "Email sent.",
 	}
@@ -348,4 +353,15 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (*dto.D
 	}
 
 	return &messageResponse, nil
+}
+
+func (s *authService) ResetPassword(req *dto.AuthResetPasswordRequest) (
+	*dto.DefaultMessageResponse, *dto.DefaultError,
+) {
+	if val, detail := validator.IsValidAuthResetPasswordRequest(req); !val {
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
+	}
+
+	// TODO: implementar lógica inteira do reset de senha
+	return nil, nil
 }

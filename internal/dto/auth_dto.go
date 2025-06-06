@@ -31,3 +31,8 @@ type AuthForgotPasswordRequest struct {
 	Email       string `json:"email"`
 	RedirectUrl string `json:"redirect_url"`
 }
+
+type AuthResetPasswordRequest struct {
+	ResetToken  string
+	NewPassword string
+}
