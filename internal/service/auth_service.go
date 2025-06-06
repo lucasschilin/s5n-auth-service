@@ -27,7 +27,9 @@ type AuthService interface {
 	Refresh(req *dto.AuthRefreshRequest) (
 		*dto.AuthRefreshResponse, *dto.DefaultError,
 	)
-	ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError
+	ForgotPassword(req *dto.AuthForgotPasswordRequest) (
+		*dto.DefaultMessageResponse, *dto.DefaultError,
+	)
 }
 
 type authService struct {
@@ -275,13 +277,17 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 	}, nil
 }
 
-func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError {
+func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (*dto.DefaultMessageResponse, *dto.DefaultError) {
+	messageResponse := dto.DefaultMessageResponse{
+		Message: "Email sent.",
+	}
+
 	if val, detail := validator.IsValidAuthForgotPasswordRequest(req); !val {
-		return errorResponse(http.StatusUnprocessableEntity, detail)
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
 	if !validator.IsValidEmailAddress(req.Email) {
-		return errorResponse(
+		return nil, errorResponse(
 			http.StatusUnprocessableEntity, "Email must be a valid address",
 		)
 	}
@@ -294,7 +300,7 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 
 	finded, _ := util.InStringSlice(allowedRedirectHosts, redirectUrlHost)
 	if !finded {
-		return errorResponse(
+		return nil, errorResponse(
 			http.StatusUnprocessableEntity,
 			"Redirect URL must be a valid and allowed URL",
 		)
@@ -302,24 +308,24 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 
 	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
 	if err != nil {
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	if userEmail == nil {
-		return nil
+		return &messageResponse, nil
 	}
 
 	user, err := s.UserRepository.GetByID(&userEmail.User)
 	if err != nil {
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	if user == nil {
-		return nil
+		return &messageResponse, nil
 	}
 
 	exp := time.Now().Add(5 * time.Minute).Unix()
 	token, err := generateToken(s.JWTPort, "reset_password", int(exp), user.ID)
 	if err != nil {
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	link := req.RedirectUrl + "?t=" + token
@@ -338,8 +344,8 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		Send()
 	if err != nil {
 		fmt.Printf("Erro ao enviar email: %v\n", err)
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
-	return nil
+	return &messageResponse, nil
 }

@@ -104,7 +104,7 @@ func (h *authHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.AuthService.ForgotPassword(req)
+	res, err := h.AuthService.ForgotPassword(req)
 	if err != nil {
 		w.WriteHeader(err.Code)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
@@ -113,5 +113,6 @@ func (h *authHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }
