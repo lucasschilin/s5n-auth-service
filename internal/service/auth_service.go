@@ -66,6 +66,8 @@ func NewAuthService(
 	}
 }
 
+const MinPasswordLength = 8
+
 func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	*dto.AuthLoginResponse, *dto.DefaultError,
 ) {
@@ -73,7 +75,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
-	const MinPasswordLength = 8
 	if len(req.Password) < MinPasswordLength {
 		return nil, errorResponse(
 			http.StatusUnprocessableEntity,
@@ -255,6 +256,8 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 		return nil, errAuthInvalidToken
 	}
 
+	// TODO: Verificar se type = "refresh_token"
+
 	sub, exists := refreshTokenClaims["sub"]
 	if !exists {
 		return nil, errAuthInvalidToken
@@ -339,7 +342,7 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (
 	body := fmt.Sprintf(`<p>Olá %s, como vai?</p>
 			<div>
 				<p>Para redefinir sua senha e recuperar sua conta, copie e cole este link no seu navegador:</p>
-				<p>%s/p>
+				<p>%s</p>
 			</div>`, user.Username, link)
 
 	err = s.MailerPort.NewMessage().
@@ -362,6 +365,59 @@ func (s *authService) ResetPassword(req *dto.AuthResetPasswordRequest) (
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
-	// TODO: implementar lógica inteira do reset de senha
-	return nil, nil
+	resetTokenClaims, err := s.JWTPort.ValidateToken(req.Token)
+	if err != nil {
+		return nil, errAuthInvalidToken
+	}
+
+	typeClaim, exists := resetTokenClaims["type"]
+	if !exists {
+		return nil, errAuthInvalidToken
+	}
+	typeClaim, ok := typeClaim.(string)
+	if !ok {
+		return nil, errAuthInvalidToken
+	}
+	if typeClaim != "reset_password" {
+		return nil, errAuthInvalidToken
+	}
+
+	if len(req.NewPassword) < MinPasswordLength {
+		return nil, errorResponse(
+			http.StatusUnprocessableEntity,
+			fmt.Sprintf(
+				"Password must have at least %v characters.",
+				MinPasswordLength,
+			),
+		)
+	}
+
+	subClaim, exists := resetTokenClaims["sub"]
+	if !exists {
+		return nil, errAuthInvalidToken
+	}
+	userID, ok := subClaim.(string)
+	if !ok {
+		return nil, errAuthInvalidToken
+	}
+
+	user, err := s.UserRepository.GetByID(&userID)
+	if err != nil {
+		return nil, errAuthInvalidToken
+	}
+
+	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.MinCost)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	if err = s.PasswordRepository.UpdateByUser(
+		user.ID, string(bcryptedPassword),
+	); err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	return &dto.DefaultMessageResponse{
+		Message: "Password changed successfully.",
+	}, nil
 }

@@ -33,6 +33,6 @@ type AuthForgotPasswordRequest struct {
 }
 
 type AuthResetPasswordRequest struct {
-	ResetToken  string
-	NewPassword string
+	Token       string `json:"token"`
+	NewPassword string `json:"new_password"`
 }
