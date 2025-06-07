@@ -10,4 +10,6 @@
 - **Nano ID** (para geração de IDs randômicos, únicos e compactos)
 - **golang-migrate** (para versionamento e execução de migrações no banco de dados)
 - **Docker** (para containerização dos serviços, incluindo os bancos)
+- **net/smtp** (biblioteca nativa do Go para envio de emails via SMTP)
 > - **Senhas** de usuários são hasheadas com **Bcrypt** e armazenadas de forma segura em um banco de dados isolado.
+

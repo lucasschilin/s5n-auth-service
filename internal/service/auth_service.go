@@ -27,7 +27,12 @@ type AuthService interface {
 	Refresh(req *dto.AuthRefreshRequest) (
 		*dto.AuthRefreshResponse, *dto.DefaultError,
 	)
-	ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError
+	ForgotPassword(req *dto.AuthForgotPasswordRequest) (
+		*dto.DefaultMessageResponse, *dto.DefaultError,
+	)
+	ResetPassword(req *dto.AuthResetPasswordRequest) (
+		*dto.DefaultMessageResponse, *dto.DefaultError,
+	)
 }
 
 type authService struct {
@@ -61,6 +66,8 @@ func NewAuthService(
 	}
 }
 
+const MinPasswordLength = 8
+
 func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	*dto.AuthLoginResponse, *dto.DefaultError,
 ) {
@@ -68,7 +75,6 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
-	const MinPasswordLength = 8
 	if len(req.Password) < MinPasswordLength {
 		return nil, errorResponse(
 			http.StatusUnprocessableEntity,
@@ -250,6 +256,8 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 		return nil, errAuthInvalidToken
 	}
 
+	// TODO: Verificar se type = "refresh_token"
+
 	sub, exists := refreshTokenClaims["sub"]
 	if !exists {
 		return nil, errAuthInvalidToken
@@ -275,13 +283,19 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 	}, nil
 }
 
-func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.DefaultError {
+func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (
+	*dto.DefaultMessageResponse, *dto.DefaultError,
+) {
+	messageResponse := dto.DefaultMessageResponse{
+		Message: "Email sent.",
+	}
+
 	if val, detail := validator.IsValidAuthForgotPasswordRequest(req); !val {
-		return errorResponse(http.StatusUnprocessableEntity, detail)
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
 	if !validator.IsValidEmailAddress(req.Email) {
-		return errorResponse(
+		return nil, errorResponse(
 			http.StatusUnprocessableEntity, "Email must be a valid address",
 		)
 	}
@@ -294,7 +308,7 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 
 	finded, _ := util.InStringSlice(allowedRedirectHosts, redirectUrlHost)
 	if !finded {
-		return errorResponse(
+		return nil, errorResponse(
 			http.StatusUnprocessableEntity,
 			"Redirect URL must be a valid and allowed URL",
 		)
@@ -302,24 +316,24 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 
 	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
 	if err != nil {
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	if userEmail == nil {
-		return nil
+		return &messageResponse, nil
 	}
 
 	user, err := s.UserRepository.GetByID(&userEmail.User)
 	if err != nil {
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 	if user == nil {
-		return nil
+		return &messageResponse, nil
 	}
 
 	exp := time.Now().Add(5 * time.Minute).Unix()
 	token, err := generateToken(s.JWTPort, "reset_password", int(exp), user.ID)
 	if err != nil {
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
 	link := req.RedirectUrl + "?t=" + token
@@ -328,7 +342,7 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 	body := fmt.Sprintf(`<p>Olá %s, como vai?</p>
 			<div>
 				<p>Para redefinir sua senha e recuperar sua conta, copie e cole este link no seu navegador:</p>
-				<p>%s/p>
+				<p>%s</p>
 			</div>`, user.Username, link)
 
 	err = s.MailerPort.NewMessage().
@@ -338,8 +352,72 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) *dto.De
 		Send()
 	if err != nil {
 		fmt.Printf("Erro ao enviar email: %v\n", err)
-		return errAuthInternalServerError
+		return nil, errAuthInternalServerError
 	}
 
-	return nil
+	return &messageResponse, nil
+}
+
+func (s *authService) ResetPassword(req *dto.AuthResetPasswordRequest) (
+	*dto.DefaultMessageResponse, *dto.DefaultError,
+) {
+	if val, detail := validator.IsValidAuthResetPasswordRequest(req); !val {
+		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
+	}
+
+	resetTokenClaims, err := s.JWTPort.ValidateToken(req.Token)
+	if err != nil {
+		return nil, errAuthInvalidToken
+	}
+
+	typeClaim, exists := resetTokenClaims["type"]
+	if !exists {
+		return nil, errAuthInvalidToken
+	}
+	typeClaim, ok := typeClaim.(string)
+	if !ok {
+		return nil, errAuthInvalidToken
+	}
+	if typeClaim != "reset_password" {
+		return nil, errAuthInvalidToken
+	}
+
+	if len(req.NewPassword) < MinPasswordLength {
+		return nil, errorResponse(
+			http.StatusUnprocessableEntity,
+			fmt.Sprintf(
+				"Password must have at least %v characters.",
+				MinPasswordLength,
+			),
+		)
+	}
+
+	subClaim, exists := resetTokenClaims["sub"]
+	if !exists {
+		return nil, errAuthInvalidToken
+	}
+	userID, ok := subClaim.(string)
+	if !ok {
+		return nil, errAuthInvalidToken
+	}
+
+	user, err := s.UserRepository.GetByID(&userID)
+	if err != nil {
+		return nil, errAuthInvalidToken
+	}
+
+	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.MinCost)
+	if err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	if err = s.PasswordRepository.UpdateByUser(
+		user.ID, string(bcryptedPassword),
+	); err != nil {
+		return nil, errAuthInternalServerError
+	}
+
+	return &dto.DefaultMessageResponse{
+		Message: "Password changed successfully.",
+	}, nil
 }

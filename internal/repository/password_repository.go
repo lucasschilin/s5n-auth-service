@@ -11,6 +11,7 @@ type PasswordRepository interface {
 		tx *sql.Tx, userID string, password string,
 	) (*model.Password, error)
 	GetByUser(userID string) (*model.Password, error)
+	UpdateByUser(userID string, newPassword string) error
 }
 
 type passwordRepository struct {
@@ -63,4 +64,17 @@ func (r *passwordRepository) GetByUser(
 	}
 
 	return &password, nil
+}
+
+func (r *passwordRepository) UpdateByUser(
+	userID string, newPassword string,
+) error {
+	if _, err := r.DB.Exec(
+		`UPDATE passwords SET password = $1 WHERE "user" = $2`,
+		newPassword, userID,
+	); err != nil {
+		return err
+	}
+
+	return nil
 }

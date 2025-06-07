@@ -13,6 +13,7 @@ type AuthHandler interface {
 	Login(w http.ResponseWriter, r *http.Request)
 	Refresh(w http.ResponseWriter, r *http.Request)
 	ForgotPassword(w http.ResponseWriter, r *http.Request)
+	ResetPassword(w http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
@@ -104,7 +105,7 @@ func (h *authHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.AuthService.ForgotPassword(req)
+	res, err := h.AuthService.ForgotPassword(req)
 	if err != nil {
 		w.WriteHeader(err.Code)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
@@ -113,5 +114,29 @@ func (h *authHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
+}
+
+func (h *authHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req *dto.AuthResetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+			Detail: "The server cannot process your request.",
+		})
+		return
+	}
+
+	res, err := h.AuthService.ResetPassword(req)
+	if err != nil {
+		w.WriteHeader(err.Code)
+		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
+			Detail: err.Detail,
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }
