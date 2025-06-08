@@ -256,13 +256,18 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 		return nil, errAuthInvalidToken
 	}
 
-	// TODO: Verificar se type = "refresh_token"
+	typeClaim, exists := refreshTokenClaims["type"]
+	if !exists {
+		return nil, errAuthInvalidToken
+	}
+	if typeClaim, ok := typeClaim.(string); !ok || typeClaim != "refresh_token" {
+		return nil, errAuthInvalidToken
+	}
 
 	sub, exists := refreshTokenClaims["sub"]
 	if !exists {
 		return nil, errAuthInvalidToken
 	}
-
 	userID, ok := sub.(string)
 	if !ok {
 		return nil, errAuthInvalidToken
