@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/lucasschilin/schily-users-api/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 )
 
 type RootHandler interface {
@@ -20,6 +20,6 @@ func NewRootHandler() RootHandler {
 func (h *rootHandler) Root(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(dto.DefaultMessageResponse{
-		Message: "Schily Users API healthed and online 🟢",
+		Message: "S5N Auth Service API healthed and online 🟢",
 	})
 }

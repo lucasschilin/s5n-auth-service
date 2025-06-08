@@ -10,11 +10,11 @@ import (
 	"github.com/aidarkhanov/nanoid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/lucasschilin/schily-users-api/internal/dto"
-	"github.com/lucasschilin/schily-users-api/internal/port"
-	"github.com/lucasschilin/schily-users-api/internal/repository"
-	"github.com/lucasschilin/schily-users-api/internal/util"
-	"github.com/lucasschilin/schily-users-api/internal/validator"
+	"github.com/lucasschilin/s5n-auth-service/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/port"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository"
+	"github.com/lucasschilin/s5n-auth-service/internal/util"
+	"github.com/lucasschilin/s5n-auth-service/internal/validator"
 )
 
 type AuthService interface {

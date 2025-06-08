@@ -1,5 +1,4 @@
-module github.com/lucasschilin/schily-users-api
-// TODO: change module name to github.com/lucasschilin/s5n-auth-service
+module github.com/lucasschilin/s5n-auth-service
 
 go 1.24.2
 

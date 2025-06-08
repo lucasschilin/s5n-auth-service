@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lucasschilin/schily-users-api/internal/adapter"
+	"github.com/lucasschilin/s5n-auth-service/internal/adapter"
 )
 
 func TestGenerationToken(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/lucasschilin/schily-users-api/internal/port"
+	"github.com/lucasschilin/s5n-auth-service/internal/port"
 )
 
 type JWT struct {

@@ -3,13 +3,13 @@ package app
 import (
 	"net/http"
 
-	"github.com/lucasschilin/schily-users-api/internal/adapter"
-	"github.com/lucasschilin/schily-users-api/internal/config"
-	"github.com/lucasschilin/schily-users-api/internal/database"
-	"github.com/lucasschilin/schily-users-api/internal/handler"
-	"github.com/lucasschilin/schily-users-api/internal/repository"
-	"github.com/lucasschilin/schily-users-api/internal/router"
-	"github.com/lucasschilin/schily-users-api/internal/service"
+	"github.com/lucasschilin/s5n-auth-service/internal/adapter"
+	"github.com/lucasschilin/s5n-auth-service/internal/config"
+	"github.com/lucasschilin/s5n-auth-service/internal/database"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository"
+	"github.com/lucasschilin/s5n-auth-service/internal/router"
+	"github.com/lucasschilin/s5n-auth-service/internal/service"
 )
 
 func InitializeApp(config *config.Config) http.Handler {

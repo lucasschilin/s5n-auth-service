@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/lucasschilin/schily-users-api/internal/handler"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler"
 )
 
 func Setup(
