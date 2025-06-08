@@ -14,6 +14,7 @@ type AuthHandler interface {
 	Refresh(w http.ResponseWriter, r *http.Request)
 	ForgotPassword(w http.ResponseWriter, r *http.Request)
 	ResetPassword(w http.ResponseWriter, r *http.Request)
+	Validate(w http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
@@ -139,4 +140,12 @@ func (h *authHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
+}
+
+func (h *authHandler) Validate(w http.ResponseWriter, r *http.Request) {
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dto.DefaultMessageResponse{
+		Message: "User authenticated.",
+	})
 }
