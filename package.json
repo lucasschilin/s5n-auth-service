@@ -9,15 +9,15 @@
   
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasschilin/schily-users-api.git"
+    "url": "git+https://github.com/lucasschilin/s5n-auth-service.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lucasschilin/schily-users-api/issues"
+    "url": "https://github.com/lucasschilin/s5n-auth-service/issues"
   },
-  "homepage": "https://github.com/lucasschilin/schily-users-api#readme",
+  "homepage": "https://github.com/lucasschilin/s5n-auth-service#readme",
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",

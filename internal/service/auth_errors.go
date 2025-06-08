@@ -3,7 +3,7 @@ package service
 import (
 	"net/http"
 
-	"github.com/lucasschilin/schily-users-api/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 )
 
 func errorResponse(code int, detail string) *dto.DefaultError {

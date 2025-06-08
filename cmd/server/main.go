@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/lucasschilin/schily-users-api/internal/app"
-	"github.com/lucasschilin/schily-users-api/internal/config"
+	"github.com/lucasschilin/s5n-auth-service/internal/app"
+	"github.com/lucasschilin/s5n-auth-service/internal/config"
 )
 
 func main() {

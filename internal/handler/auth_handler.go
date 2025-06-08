@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/lucasschilin/schily-users-api/internal/dto"
-	"github.com/lucasschilin/schily-users-api/internal/service"
+	"github.com/lucasschilin/s5n-auth-service/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/service"
 )
 
 type AuthHandler interface {

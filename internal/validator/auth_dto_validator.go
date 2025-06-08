@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"github.com/lucasschilin/schily-users-api/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 )
 
 func IsValidAuthSignupRequest(req *dto.AuthSignupRequest) (bool, string) {

@@ -3,8 +3,8 @@ package validator_test
 import (
 	"testing"
 
-	"github.com/lucasschilin/schily-users-api/internal/dto"
-	"github.com/lucasschilin/schily-users-api/internal/validator"
+	"github.com/lucasschilin/s5n-auth-service/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/validator"
 )
 
 func TestIsValidAuthSignupRequest(t *testing.T) {

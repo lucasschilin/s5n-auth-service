@@ -3,7 +3,7 @@ package validator_test
 import (
 	"testing"
 
-	"github.com/lucasschilin/schily-users-api/internal/validator"
+	"github.com/lucasschilin/s5n-auth-service/internal/validator"
 )
 
 func TestIsValidEmailAddress(t *testing.T) {

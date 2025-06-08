@@ -6,7 +6,7 @@ import (
 	"net/smtp"
 	"strings"
 
-	"github.com/lucasschilin/schily-users-api/internal/port"
+	"github.com/lucasschilin/s5n-auth-service/internal/port"
 )
 
 type mailerSMTP struct {

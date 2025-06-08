@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/lucasschilin/schily-users-api/internal/config"
+	"github.com/lucasschilin/s5n-auth-service/internal/config"
 )
 
 func ConnectDBAuth(config *config.DBAuth) *sql.DB {

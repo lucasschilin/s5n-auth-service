@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/lucasschilin/schily-users-api/internal/config"
+	"github.com/lucasschilin/s5n-auth-service/internal/config"
 )
 
 func TestLoad(t *testing.T) {

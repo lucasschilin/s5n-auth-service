@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"github.com/lucasschilin/schily-users-api/internal/port"
+	"github.com/lucasschilin/s5n-auth-service/internal/port"
 )
 
 func generateAccessToken(jwtPort port.JWT, userID string) (string, error) {

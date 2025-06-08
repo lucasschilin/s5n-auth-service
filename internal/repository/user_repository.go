@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/lucasschilin/schily-users-api/internal/model"
+	"github.com/lucasschilin/s5n-auth-service/internal/model"
 )
 
 type UserRepository interface {
