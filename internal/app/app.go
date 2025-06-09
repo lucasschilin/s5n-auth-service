@@ -9,7 +9,7 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/handler"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository"
 	"github.com/lucasschilin/s5n-auth-service/internal/router"
-	"github.com/lucasschilin/s5n-auth-service/internal/service"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/auth"
 )
 
 func InitializeApp(config *config.Config) http.Handler {
@@ -26,7 +26,7 @@ func InitializeApp(config *config.Config) http.Handler {
 		&config.SMTP.Password, &config.SMTP.From,
 	)
 
-	authServ := service.NewAuthService(
+	authServ := auth.NewService(
 		usersDB, authDB, userRepo, userEmailRepo,
 		passwordRepo, jwtAdapter, mailerAdapter,
 	)

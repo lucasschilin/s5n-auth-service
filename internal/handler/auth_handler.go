@@ -6,7 +6,7 @@ import (
 
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
-	"github.com/lucasschilin/s5n-auth-service/internal/service"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/auth"
 )
 
 type AuthHandler interface {
@@ -19,10 +19,10 @@ type AuthHandler interface {
 }
 
 type authHandler struct {
-	AuthService service.AuthService
+	AuthService auth.Service
 }
 
-func NewAuthHandler(authServ service.AuthService) AuthHandler {
+func NewAuthHandler(authServ auth.Service) AuthHandler {
 	return &authHandler{
 		AuthService: authServ,
 	}
