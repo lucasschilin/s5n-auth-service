@@ -25,10 +25,10 @@ func Setup(
 	auth.HandleFunc("/forgot-password", authHand.ForgotPassword).Methods(http.MethodPost)
 	auth.HandleFunc("/reset-password", authHand.ResetPassword).Methods(http.MethodPost)
 
-	requireLogin := auth.PathPrefix("").Subrouter()
-	requireLogin.Use(middleware.CheckAuthentication)
-
-	requireLogin.HandleFunc("/validate", authHand.Validate).Methods(http.MethodGet)
+	auth.Handle(
+		"/validate",
+		middleware.CheckAuthentication(http.HandlerFunc(authHand.Validate))).
+		Methods(http.MethodGet)
 
 	return r
 }
