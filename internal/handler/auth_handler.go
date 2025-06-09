@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
 	"github.com/lucasschilin/s5n-auth-service/internal/service"
 )
 
@@ -144,8 +145,14 @@ func (h *authHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 func (h *authHandler) Validate(w http.ResponseWriter, r *http.Request) {
 
+	userID := r.Context().Value(middleware.UserIDKey).(string)
+
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dto.DefaultMessageResponse{
-		Message: "User authenticated.",
+	json.NewEncoder(w).Encode(dto.AuthValidateResponse{
+		User: struct {
+			ID string `json:"id"`
+		}{
+			ID: userID,
+		},
 	})
 }

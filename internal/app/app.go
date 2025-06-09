@@ -34,7 +34,7 @@ func InitializeApp(config *config.Config) http.Handler {
 	authHand := handler.NewAuthHandler(authServ)
 	rootHand := handler.NewRootHandler()
 
-	r := router.Setup(authHand, rootHand)
+	r := router.Setup(authHand, rootHand, jwtAdapter)
 
 	return r
 }

@@ -36,3 +36,9 @@ type AuthResetPasswordRequest struct {
 	Token       string `json:"token"`
 	NewPassword string `json:"new_password"`
 }
+
+type AuthValidateResponse struct {
+	User struct {
+		ID string `json:"id"`
+	} `json:"user"`
+}
