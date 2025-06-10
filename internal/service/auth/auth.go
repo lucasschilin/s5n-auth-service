@@ -7,6 +7,7 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/port"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
 )
 
 type Service interface {
@@ -30,7 +31,7 @@ type Service interface {
 type authService struct {
 	UsersDB             *sql.DB
 	AuthDB              *sql.DB
-	UserRepository      repository.UserRepository
+	UserRepository      user.Repository
 	UserEmailRepository repository.UserEmailRepository
 	PasswordRepository  password.Repository
 	JWTPort             port.JWT
@@ -40,7 +41,7 @@ type authService struct {
 func NewService(
 	usersDB *sql.DB,
 	authDB *sql.DB,
-	userRepo repository.UserRepository,
+	userRepo user.Repository,
 	userEmailRepo repository.UserEmailRepository,
 	passwordRepo password.Repository,
 	jwtPort port.JWT,

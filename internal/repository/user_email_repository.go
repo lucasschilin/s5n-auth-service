@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 
+	"github.com/aidarkhanov/nanoid"
 	"github.com/lucasschilin/s5n-auth-service/internal/model"
 )
 
@@ -49,11 +50,13 @@ func (r *userEmailRepository) CreateWithTX(
 ) (*model.UserEmail, error) {
 	var newUserEmail model.UserEmail
 
+	newID := nanoid.New()
+
 	err := tx.QueryRow(
 		`INSERT INTO users_emails (id, "user", address, verify_token) 
 		VALUES ($1, $2, $3, $4) 
 		RETURNING id, "user", address, verify_token, created_at, updated_at`,
-		newID(), userID, address, verifyToken,
+		newID, userID, address, verifyToken,
 	).Scan(
 		&newUserEmail.ID,
 		&newUserEmail.User,

@@ -9,6 +9,7 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/handler"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
 	"github.com/lucasschilin/s5n-auth-service/internal/router"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/auth"
 )
@@ -17,7 +18,7 @@ func InitializeApp(config *config.Config) http.Handler {
 	usersDB := database.ConnectDBUsers(config.DBUsers)
 	authDB := database.ConnectDBAuth(config.DBAuth)
 
-	userRepo := repository.NewUserRepository(usersDB)
+	userRepo := user.NewRepository(usersDB)
 	userEmailRepo := repository.NewUserEmailRepository(usersDB)
 	passwordRepo := password.NewRepository(authDB)
 
