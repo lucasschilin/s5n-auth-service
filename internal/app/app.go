@@ -7,9 +7,9 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/config"
 	"github.com/lucasschilin/s5n-auth-service/internal/database"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler"
-	"github.com/lucasschilin/s5n-auth-service/internal/repository"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/useremail"
 	"github.com/lucasschilin/s5n-auth-service/internal/router"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/auth"
 )
@@ -19,7 +19,7 @@ func InitializeApp(config *config.Config) http.Handler {
 	authDB := database.ConnectDBAuth(config.DBAuth)
 
 	userRepo := user.NewRepository(usersDB)
-	userEmailRepo := repository.NewUserEmailRepository(usersDB)
+	userEmailRepo := useremail.NewRepository(usersDB)
 	passwordRepo := password.NewRepository(authDB)
 
 	jwtAdapter := adapter.NewJWT(config.JWT.SecretKey)

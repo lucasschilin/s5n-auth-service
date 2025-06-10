@@ -5,9 +5,9 @@ import (
 
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 	"github.com/lucasschilin/s5n-auth-service/internal/port"
-	"github.com/lucasschilin/s5n-auth-service/internal/repository"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/useremail"
 )
 
 type Service interface {
@@ -32,7 +32,7 @@ type authService struct {
 	UsersDB             *sql.DB
 	AuthDB              *sql.DB
 	UserRepository      user.Repository
-	UserEmailRepository repository.UserEmailRepository
+	UserEmailRepository useremail.Repository
 	PasswordRepository  password.Repository
 	JWTPort             port.JWT
 	MailerPort          port.Mailer
@@ -42,7 +42,7 @@ func NewService(
 	usersDB *sql.DB,
 	authDB *sql.DB,
 	userRepo user.Repository,
-	userEmailRepo repository.UserEmailRepository,
+	userEmailRepo useremail.Repository,
 	passwordRepo password.Repository,
 	jwtPort port.JWT,
 	mailerPort port.Mailer,
