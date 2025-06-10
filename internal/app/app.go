@@ -7,6 +7,7 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/config"
 	"github.com/lucasschilin/s5n-auth-service/internal/database"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler/root"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/useremail"
@@ -34,7 +35,7 @@ func InitializeApp(config *config.Config) http.Handler {
 	)
 
 	authHand := handler.NewAuthHandler(authServ)
-	rootHand := handler.NewRootHandler()
+	rootHand := root.NewHandler()
 
 	r := router.Setup(authHand, rootHand, jwtAdapter)
 

@@ -5,13 +5,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler/root"
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
 	"github.com/lucasschilin/s5n-auth-service/internal/port"
 )
 
 func Setup(
 	authHand handler.AuthHandler,
-	rootHand handler.RootHandler,
+	rootHand root.Handler,
 	jwtPort port.JWT,
 ) *mux.Router {
 	r := mux.NewRouter()
