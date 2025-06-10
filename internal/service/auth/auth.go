@@ -6,6 +6,7 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 	"github.com/lucasschilin/s5n-auth-service/internal/port"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
 )
 
 type Service interface {
@@ -31,7 +32,7 @@ type authService struct {
 	AuthDB              *sql.DB
 	UserRepository      repository.UserRepository
 	UserEmailRepository repository.UserEmailRepository
-	PasswordRepository  repository.PasswordRepository
+	PasswordRepository  password.Repository
 	JWTPort             port.JWT
 	MailerPort          port.Mailer
 }
@@ -41,7 +42,7 @@ func NewService(
 	authDB *sql.DB,
 	userRepo repository.UserRepository,
 	userEmailRepo repository.UserEmailRepository,
-	passwordRepo repository.PasswordRepository,
+	passwordRepo password.Repository,
 	jwtPort port.JWT,
 	mailerPort port.Mailer,
 
@@ -58,5 +59,3 @@ func NewService(
 }
 
 const MinPasswordLength = 8
-
-// TODO: refatorar o restante do Service para o formato package
