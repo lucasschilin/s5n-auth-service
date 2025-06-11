@@ -1,4 +1,4 @@
-package auth
+package authhandler
 
 import (
 	"encoding/json"
@@ -7,8 +7,8 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 )
 
-func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
-	var req *dto.AuthLoginRequest
+func (h *handler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var req *dto.AuthForgotPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
@@ -17,7 +17,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.AuthService.Login(req)
+	res, err := h.AuthService.ForgotPassword(req)
 	if err != nil {
 		w.WriteHeader(err.Code)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{

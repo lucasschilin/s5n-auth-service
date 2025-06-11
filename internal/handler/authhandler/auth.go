@@ -1,9 +1,9 @@
-package auth
+package authhandler
 
 import (
 	"net/http"
 
-	"github.com/lucasschilin/s5n-auth-service/internal/service/auth"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice"
 )
 
 type Handler interface {
@@ -16,10 +16,10 @@ type Handler interface {
 }
 
 type handler struct {
-	AuthService auth.Service
+	AuthService authservice.Service
 }
 
-func NewHandler(authServ auth.Service) Handler {
+func NewHandler(authServ authservice.Service) Handler {
 	return &handler{
 		AuthService: authServ,
 	}

@@ -4,15 +4,15 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/lucasschilin/s5n-auth-service/internal/handler/auth"
-	"github.com/lucasschilin/s5n-auth-service/internal/handler/root"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler/authhandler"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler/roothandler"
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
 	"github.com/lucasschilin/s5n-auth-service/internal/port"
 )
 
 func Setup(
-	authHand auth.Handler,
-	rootHand root.Handler,
+	authHand authhandler.Handler,
+	rootHand roothandler.Handler,
 	jwtPort port.JWT,
 ) *mux.Router {
 	r := mux.NewRouter()
