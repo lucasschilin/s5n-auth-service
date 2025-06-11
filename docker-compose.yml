@@ -23,6 +23,13 @@ services:
     volumes:
       - volume-s5n_auth_service_db_auth:/var/lib/postgresql/data
 
+  redis-s5n_auth_service:
+    image: redis:8
+    container_name: redis-s5n_auth_service
+    ports:
+      - "${REDIS_PORT}:6379"
+    # TODO: config username and passwords
+
 volumes:
   volume-s5n_auth_service_db_users:
   volume-s5n_auth_service_db_auth:
