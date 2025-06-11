@@ -6,19 +6,22 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/adapter"
 	"github.com/lucasschilin/s5n-auth-service/internal/config"
 	"github.com/lucasschilin/s5n-auth-service/internal/database"
-	"github.com/lucasschilin/s5n-auth-service/internal/handler"
-	"github.com/lucasschilin/s5n-auth-service/internal/repository"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler/authhandler"
+	"github.com/lucasschilin/s5n-auth-service/internal/handler/roothandler"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
+	"github.com/lucasschilin/s5n-auth-service/internal/repository/useremail"
 	"github.com/lucasschilin/s5n-auth-service/internal/router"
-	"github.com/lucasschilin/s5n-auth-service/internal/service"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice"
 )
 
 func InitializeApp(config *config.Config) http.Handler {
 	usersDB := database.ConnectDBUsers(config.DBUsers)
 	authDB := database.ConnectDBAuth(config.DBAuth)
 
-	userRepo := repository.NewUserRepository(usersDB)
-	userEmailRepo := repository.NewUserEmailRepository(usersDB)
-	passwordRepo := repository.NewPasswordRepository(authDB)
+	userRepo := user.NewRepository(usersDB)
+	userEmailRepo := useremail.NewRepository(usersDB)
+	passwordRepo := password.NewRepository(authDB)
 
 	jwtAdapter := adapter.NewJWT(config.JWT.SecretKey)
 	mailerAdapter := adapter.NewSMTPMailer(
@@ -26,13 +29,13 @@ func InitializeApp(config *config.Config) http.Handler {
 		&config.SMTP.Password, &config.SMTP.From,
 	)
 
-	authServ := service.NewAuthService(
+	authServ := authservice.NewService(
 		usersDB, authDB, userRepo, userEmailRepo,
 		passwordRepo, jwtAdapter, mailerAdapter,
 	)
 
-	authHand := handler.NewAuthHandler(authServ)
-	rootHand := handler.NewRootHandler()
+	authHand := authhandler.NewHandler(authServ)
+	rootHand := roothandler.NewHandler()
 
 	r := router.Setup(authHand, rootHand, jwtAdapter)
 
