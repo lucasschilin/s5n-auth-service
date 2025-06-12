@@ -28,7 +28,7 @@ services:
     container_name: redis-s5n_auth_service
     ports:
       - "${REDIS_PORT}:6379"
-    # TODO: config username and passwords
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
 
 volumes:
   volume-s5n_auth_service_db_users:
