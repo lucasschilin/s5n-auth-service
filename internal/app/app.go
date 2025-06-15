@@ -19,15 +19,6 @@ func InitializeApp(config *config.Config) http.Handler {
 	usersDB := database.ConnectDBUsers(config.DBUsers)
 	authDB := database.ConnectDBAuth(config.DBAuth)
 
-	// cache := cache.NewRedisClient(
-	// 	config.Redis.Host,
-	// 	config.Redis.Port,
-	// 	config.Redis.Password,
-	// 	0,
-	// )
-
-	// TODO: Alocar a conexão com Redis Client onde precisar
-
 	userRepo := user.NewRepository(usersDB)
 	userEmailRepo := useremail.NewRepository(usersDB)
 	passwordRepo := password.NewRepository(authDB)
