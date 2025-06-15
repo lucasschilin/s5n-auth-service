@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/adapter"
+	"github.com/lucasschilin/s5n-auth-service/internal/cache"
 	"github.com/lucasschilin/s5n-auth-service/internal/config"
 	"github.com/lucasschilin/s5n-auth-service/internal/database"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler/authhandler"
@@ -18,6 +19,10 @@ import (
 func InitializeApp(config *config.Config) http.Handler {
 	usersDB := database.ConnectDBUsers(config.DBUsers)
 	authDB := database.ConnectDBAuth(config.DBAuth)
+
+	cache := cache.NewRedisClient(
+		config.Redis.Host, config.Redis.Port, config.Redis.Password, 0,
+	)
 
 	userRepo := user.NewRepository(usersDB)
 	userEmailRepo := useremail.NewRepository(usersDB)
@@ -37,7 +42,7 @@ func InitializeApp(config *config.Config) http.Handler {
 	authHand := authhandler.NewHandler(authServ)
 	rootHand := roothandler.NewHandler()
 
-	r := router.Setup(authHand, rootHand, jwtAdapter)
+	r := router.Setup(authHand, rootHand, jwtAdapter, cache)
 
 	return r
 }
