@@ -10,6 +10,7 @@ type Config struct {
 	API     *API
 	DBUsers *DBUsers
 	DBAuth  *DBAuth
+	Redis   *Redis
 	JWT     *JWT
 	SMTP    *SMTP
 }
@@ -18,7 +19,6 @@ type API struct {
 	Host string
 	Port string
 }
-
 type DBUsers struct {
 	Host     string
 	Port     string
@@ -26,13 +26,17 @@ type DBUsers struct {
 	Password string
 	Name     string
 }
-
 type DBAuth struct {
 	Host     string
 	Port     string
 	Username string
 	Password string
 	Name     string
+}
+type Redis struct {
+	Host     string
+	Port     string
+	Password string
 }
 type JWT struct {
 	SecretKey string
@@ -66,6 +70,11 @@ func Load() *Config {
 		Port:     os.Getenv("DB_AUTH_PORT"),
 		Name:     os.Getenv("DB_AUTH_NAME"),
 	}
+	RedisConfig := Redis{
+		Host:     os.Getenv("REDIS_HOST"),
+		Port:     os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+	}
 	JWTConfig := JWT{
 		SecretKey: os.Getenv("JWT_SECRET_KEY"),
 	}
@@ -81,6 +90,7 @@ func Load() *Config {
 		API:     &APIConfig,
 		DBUsers: &DBUsersConfig,
 		DBAuth:  &DBAuthConfig,
+		Redis:   &RedisConfig,
 		JWT:     &JWTConfig,
 		SMTP:    &SMTPConfig,
 	}
