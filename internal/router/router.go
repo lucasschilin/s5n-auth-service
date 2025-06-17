@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/lucasschilin/s5n-auth-service/internal/cache"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler/authhandler"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler/roothandler"
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
@@ -14,9 +15,11 @@ func Setup(
 	authHand authhandler.Handler,
 	rootHand roothandler.Handler,
 	jwtPort port.JWT,
+	cache cache.Cache,
 ) *mux.Router {
 	r := mux.NewRouter()
-	r.Use(middleware.JSONContentType)
+	r.Use(middleware.RateLimit(cache))
+	r.Use(middleware.JSONContentType())
 
 	root := r.PathPrefix("").Subrouter()
 	root.HandleFunc("/", rootHand.Root).Methods(http.MethodGet)
@@ -29,9 +32,8 @@ func Setup(
 	auth.HandleFunc("/reset-password", authHand.ResetPassword).Methods(http.MethodPost)
 	auth.Handle(
 		"/validate",
-		middleware.CheckAuthentication(
-			http.HandlerFunc(authHand.Validate),
-			jwtPort,
+		middleware.CheckAuthentication(jwtPort)(
+			(http.HandlerFunc(authHand.Validate)),
 		)).Methods(http.MethodGet)
 
 	return r
