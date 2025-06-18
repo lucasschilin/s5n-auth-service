@@ -22,12 +22,6 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
-	if !validator.IsValidEmailAddress(req.Email) {
-		return nil, errorResponse(
-			http.StatusUnprocessableEntity, "Email must be a valid address",
-		)
-	}
-
 	allowedRedirectHosts := []string{"s5n.com.br"}
 
 	redirectUrlWithoutHttp := strings.ReplaceAll(strings.ToLower(req.RedirectUrl), "http://", "")
