@@ -67,11 +67,7 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (
 				<p>%s</p>
 			</div>`, user.Username, link)
 
-	err = s.MailerPort.NewMessage().
-		Subject(&subject).
-		Body(&body).
-		To(&[]string{userEmail.Address}).
-		Send()
+	err = s.Mailer.SendMessage([]string{userEmail.Address}, subject, body)
 	if err != nil {
 		fmt.Printf("Erro ao enviar email: %v\n", err)
 		return nil, errAuthInternalServerError
