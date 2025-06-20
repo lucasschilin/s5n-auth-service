@@ -16,7 +16,7 @@ func (s *authService) ResetPassword(req *dto.AuthResetPasswordRequest) (
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
-	resetTokenClaims, err := s.JWTPort.ValidateToken(req.Token)
+	resetTokenClaims, err := s.TokenManager.ValidateToken(req.Token)
 	if err != nil {
 		return nil, errAuthInvalidToken
 	}

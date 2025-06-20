@@ -1,25 +1,27 @@
-package adapter
-
-// TODO: refatorar para o formato do cache
+package jwt
 
 import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/lucasschilin/s5n-auth-service/internal/port"
 )
 
-type JWT struct {
+type TokenManager interface {
+	GenerateToken(claims map[string]interface{}) (string, error)
+	ValidateToken(token string) (map[string]interface{}, error)
+}
+
+type JWTManager struct {
 	secretKey string
 }
 
-func NewJWT(secretKey string) port.JWT {
-	return &JWT{
+func NewJWT(secretKey string) TokenManager {
+	return &JWTManager{
 		secretKey: secretKey,
 	}
 }
 
-func (j *JWT) GenerateToken(claims map[string]interface{}) (string, error) {
+func (j *JWTManager) GenerateToken(claims map[string]interface{}) (string, error) {
 	mapClaims := jwt.MapClaims{}
 	for key, value := range claims {
 		mapClaims[key] = value
@@ -35,7 +37,7 @@ func (j *JWT) GenerateToken(claims map[string]interface{}) (string, error) {
 	return token, nil
 }
 
-func (j *JWT) ValidateToken(token string) (map[string]interface{}, error) {
+func (j *JWTManager) ValidateToken(token string) (map[string]interface{}, error) {
 
 	claims := jwt.MapClaims{}
 

@@ -7,14 +7,14 @@ import (
 	"strings"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
-	"github.com/lucasschilin/s5n-auth-service/internal/port"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
 )
 
 type contextKey string
 
 const UserIDKey = contextKey("user_id")
 
-func CheckAuthentication(jwtPort port.JWT) func(http.Handler) http.Handler {
+func CheckAuthentication(tokenManager jwt.TokenManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -31,7 +31,7 @@ func CheckAuthentication(jwtPort port.JWT) func(http.Handler) http.Handler {
 
 			accessTokenString := strings.TrimPrefix(accessToken, "Bearer ")
 
-			accessTokenClaims, err := jwtPort.ValidateToken(accessTokenString)
+			accessTokenClaims, err := tokenManager.ValidateToken(accessTokenString)
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				json.NewEncoder(w).Encode(res)

@@ -102,12 +102,12 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		return nil, errAuthInternalServerError
 	}
 
-	accessToken, err := generateAccessToken(s.JWTPort, newUser.ID)
+	accessToken, err := generateAccessToken(s.TokenManager, newUser.ID)
 	if err != nil {
 		return nil, errAuthInternalServerError
 	}
 
-	refreshToken, err := generateRefreshToken(s.JWTPort, newUser.ID)
+	refreshToken, err := generateRefreshToken(s.TokenManager, newUser.ID)
 	if err != nil {
 		return nil, errAuthInternalServerError
 	}

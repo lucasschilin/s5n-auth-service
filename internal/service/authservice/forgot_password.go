@@ -53,7 +53,7 @@ func (s *authService) ForgotPassword(req *dto.AuthForgotPasswordRequest) (
 	}
 
 	exp := time.Now().Add(5 * time.Minute).Unix()
-	token, err := generateToken(s.JWTPort, "reset_password", int(exp), user.ID)
+	token, err := generateToken(s.TokenManager, "reset_password", int(exp), user.ID)
 	if err != nil {
 		return nil, errAuthInternalServerError
 	}

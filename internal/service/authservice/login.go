@@ -38,12 +38,12 @@ func (s *authService) Login(req *dto.AuthLoginRequest) (
 		return nil, errAuthLoginInvalidCredentials
 	}
 
-	accessToken, err := generateAccessToken(s.JWTPort, userEmail.User)
+	accessToken, err := generateAccessToken(s.TokenManager, userEmail.User)
 	if err != nil {
 		return nil, errAuthInternalServerError
 	}
 
-	refreshToken, err := generateRefreshToken(s.JWTPort, userEmail.User)
+	refreshToken, err := generateRefreshToken(s.TokenManager, userEmail.User)
 	if err != nil {
 		return nil, errAuthInternalServerError
 	}
