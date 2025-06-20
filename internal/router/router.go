@@ -8,13 +8,13 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/handler/authhandler"
 	"github.com/lucasschilin/s5n-auth-service/internal/handler/roothandler"
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
-	"github.com/lucasschilin/s5n-auth-service/internal/port"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
 )
 
 func Setup(
 	authHand authhandler.Handler,
 	rootHand roothandler.Handler,
-	jwtPort port.JWT,
+	tokenManager jwt.TokenManager,
 	cache cache.Cache,
 ) *mux.Router {
 	r := mux.NewRouter()
@@ -32,7 +32,7 @@ func Setup(
 	auth.HandleFunc("/reset-password", authHand.ResetPassword).Methods(http.MethodPost)
 	auth.Handle(
 		"/validate",
-		middleware.CheckAuthentication(jwtPort)(
+		middleware.CheckAuthentication(tokenManager)(
 			(http.HandlerFunc(authHand.Validate)),
 		)).Methods(http.MethodGet)
 

@@ -5,10 +5,10 @@ import (
 
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 	"github.com/lucasschilin/s5n-auth-service/internal/integrations/mailer"
-	"github.com/lucasschilin/s5n-auth-service/internal/port"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/password"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/useremail"
+	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
 )
 
 type Service interface {
@@ -35,7 +35,7 @@ type authService struct {
 	UserRepository      user.Repository
 	UserEmailRepository useremail.Repository
 	PasswordRepository  password.Repository
-	JWTPort             port.JWT
+	TokenManager        jwt.TokenManager
 	Mailer              mailer.Mailer
 }
 
@@ -45,7 +45,7 @@ func NewService(
 	userRepo user.Repository,
 	userEmailRepo useremail.Repository,
 	passwordRepo password.Repository,
-	jwtPort port.JWT,
+	tokenManager jwt.TokenManager,
 	mailerPort mailer.Mailer,
 
 ) Service {
@@ -55,7 +55,7 @@ func NewService(
 		UserRepository:      userRepo,
 		UserEmailRepository: userEmailRepo,
 		PasswordRepository:  passwordRepo,
-		JWTPort:             jwtPort,
+		TokenManager:        tokenManager,
 		Mailer:              mailerPort,
 	}
 }

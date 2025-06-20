@@ -14,7 +14,7 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
-	refreshTokenClaims, err := s.JWTPort.ValidateToken(req.RefreshToken)
+	refreshTokenClaims, err := s.TokenManager.ValidateToken(req.RefreshToken)
 	if err != nil {
 		return nil, errAuthInvalidToken
 	}
@@ -41,7 +41,7 @@ func (s *authService) Refresh(req *dto.AuthRefreshRequest) (
 		return nil, errAuthInvalidToken
 	}
 
-	accessToken, err := generateAccessToken(s.JWTPort, user.ID)
+	accessToken, err := generateAccessToken(s.TokenManager, user.ID)
 	if err != nil {
 		return nil, errAuthInternalServerError
 	}
