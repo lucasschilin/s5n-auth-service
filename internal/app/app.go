@@ -15,9 +15,12 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/router"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
 func InitializeApp(config *config.Config) http.Handler {
+	l := logger.New(0) //TODO: Add variável no .env para inicialização
+
 	usersDB := database.ConnectDBUsers(config.DBUsers)
 	authDB := database.ConnectDBAuth(config.DBAuth)
 
@@ -43,7 +46,7 @@ func InitializeApp(config *config.Config) http.Handler {
 	authHand := authhandler.NewHandler(authServ)
 	rootHand := roothandler.NewHandler()
 
-	r := router.Setup(authHand, rootHand, jwtManager, cache)
+	r := router.Setup(l, authHand, rootHand, jwtManager, cache)
 
 	return r
 }

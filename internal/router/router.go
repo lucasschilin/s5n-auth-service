@@ -9,16 +9,18 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/handler/roothandler"
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
 func Setup(
+	l logger.Logger,
 	authHand authhandler.Handler,
 	rootHand roothandler.Handler,
 	tokenManager jwt.TokenManager,
 	cache cache.Cache,
 ) *mux.Router {
 	r := mux.NewRouter()
-	r.Use(middleware.RateLimit(cache))
+	r.Use(middleware.RateLimit(l, cache))
 	r.Use(middleware.JSONContentType())
 
 	root := r.PathPrefix("").Subrouter()

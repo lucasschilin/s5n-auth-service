@@ -24,7 +24,18 @@ type logString struct {
 	text string
 }
 
-func New(level int) *logger {
+type Logger interface {
+	Error(error error, msg string)
+	Errorf(error error, formatMsg string, a ...any)
+	Warning(msg string)
+	Warningf(formatMsg string, a ...any)
+	Info(msg string)
+	Infof(formatMsg string, a ...any)
+	Debug(msg string)
+	Debugf(formatMsg string, a ...any)
+}
+
+func New(level int) Logger {
 	return &logger{
 		minLevel: level,
 	}
