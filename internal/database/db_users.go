@@ -3,26 +3,27 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/lib/pq"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/config"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
-func ConnectDBUsers(config *config.DBUsers) *sql.DB {
+func ConnectDBUsers(l logger.Logger, config *config.DBUsers) *sql.DB {
 	dsn := fmt.Sprintf(
 		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		config.Username, config.Password, config.Host, config.Port, config.Name,
 	)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalf("failed to connect to users db: %v", err)
+		l.Errorf(err, "failed to connect to users_db")
 	}
 
 	if err = db.Ping(); err != nil {
-		log.Fatalf("users db not reachable: %v", err)
+		l.Errorf(err, "users_db not reachable")
 	}
 
+	l.Info("connected to users_db")
 	return db
 }

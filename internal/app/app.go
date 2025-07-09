@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/cache"
 	"github.com/lucasschilin/s5n-auth-service/internal/config"
@@ -19,10 +20,11 @@ import (
 )
 
 func InitializeApp(config *config.Config) http.Handler {
-	l := logger.New(0) //TODO: Add variável no .env para inicialização
+	logLevel, _ := strconv.ParseInt(config.Log.Level, 10, 8)
+	l := logger.New(int(logLevel))
 
-	usersDB := database.ConnectDBUsers(config.DBUsers)
-	authDB := database.ConnectDBAuth(config.DBAuth)
+	usersDB := database.ConnectDBUsers(l, config.DBUsers)
+	authDB := database.ConnectDBAuth(l, config.DBAuth)
 
 	cache := cache.NewRedisClient(
 		config.Redis.Host, config.Redis.Port, config.Redis.Password, 0,

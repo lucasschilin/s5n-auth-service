@@ -13,6 +13,7 @@ type Config struct {
 	Redis   *Redis
 	JWT     *JWT
 	SMTP    *SMTP
+	Log     *Log
 }
 
 type API struct {
@@ -47,6 +48,10 @@ type SMTP struct {
 	Username string
 	Password string
 	From     string
+}
+
+type Log struct {
+	Level string
 }
 
 func Load() *Config {
@@ -85,6 +90,9 @@ func Load() *Config {
 		Password: os.Getenv("SMTP_PASSWORD"),
 		From:     os.Getenv("SMTP_FROM"),
 	}
+	LogConfig := Log{
+		Level: os.Getenv("LOG_LEVEL"),
+	}
 
 	return &Config{
 		API:     &APIConfig,
@@ -93,6 +101,7 @@ func Load() *Config {
 		Redis:   &RedisConfig,
 		JWT:     &JWTConfig,
 		SMTP:    &SMTPConfig,
+		Log:     &LogConfig,
 	}
 
 }

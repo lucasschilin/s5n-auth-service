@@ -30,7 +30,7 @@ func RateLimit(l logger.Logger, cache cache.Cache) func(http.Handler) http.Handl
 			if r.UserAgent() != "" {
 				userAgent = r.UserAgent()
 			}
-			l.Infof("New request from %s:%s(%s) address", ip, port, userAgent)
+			l.Infof("Route '%s' was requested from %s:%s(%s) address", r.RequestURI, ip, port, userAgent)
 			key := fmt.Sprintf(
 				"%s:%s", prefix, userIdentifierHash(ip+userAgent),
 			)
