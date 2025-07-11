@@ -10,6 +10,7 @@ import (
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req *dto.AuthLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.l.Error(err, "")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
 			Detail: "The server cannot process your request.",
@@ -17,7 +18,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.AuthService.Login(req)
+	res, err := h.AuthService.Login(h.l, req)
 	if err != nil {
 		w.WriteHeader(err.Code)
 		json.NewEncoder(w).Encode(dto.DefaultDetailResponse{

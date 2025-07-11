@@ -18,10 +18,14 @@ func ConnectDBUsers(l logger.Logger, config *config.DBUsers) *sql.DB {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		l.Errorf(err, "failed to connect to users_db")
+		panic(true)
+
 	}
 
 	if err = db.Ping(); err != nil {
 		l.Errorf(err, "users_db not reachable")
+		panic(true)
+
 	}
 
 	l.Info("connected to users_db")

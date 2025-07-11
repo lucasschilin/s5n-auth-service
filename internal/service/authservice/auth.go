@@ -16,7 +16,7 @@ type Service interface {
 	Signup(l logger.Logger, req *dto.AuthSignupRequest) (
 		*dto.AuthLoginResponse, *dto.DefaultError,
 	)
-	Login(req *dto.AuthLoginRequest) (
+	Login(l logger.Logger, req *dto.AuthLoginRequest) (
 		*dto.AuthLoginResponse, *dto.DefaultError,
 	)
 	Refresh(req *dto.AuthRefreshRequest) (

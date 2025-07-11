@@ -18,10 +18,14 @@ func ConnectDBAuth(l logger.Logger, config *config.DBAuth) *sql.DB {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		l.Errorf(err, "failed to connect to auth_db")
+		panic(true)
+
 	}
 
 	if err = db.Ping(); err != nil {
 		l.Errorf(err, "auth_db not reachable")
+		panic(true)
+
 	}
 
 	l.Info("connected to auth_db")
