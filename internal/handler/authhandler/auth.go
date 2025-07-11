@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
 type Handler interface {
@@ -16,11 +17,13 @@ type Handler interface {
 }
 
 type handler struct {
+	l           logger.Logger
 	AuthService authservice.Service
 }
 
-func NewHandler(authServ authservice.Service) Handler {
+func NewHandler(l logger.Logger, authServ authservice.Service) Handler {
 	return &handler{
+		l:           l,
 		AuthService: authServ,
 	}
 }

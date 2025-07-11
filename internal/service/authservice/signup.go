@@ -8,17 +8,20 @@ import (
 	"github.com/aidarkhanov/nanoid"
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 	"github.com/lucasschilin/s5n-auth-service/internal/validator"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *authService) Signup(req *dto.AuthSignupRequest) (
+func (s *authService) Signup(l logger.Logger, req *dto.AuthSignupRequest) (
 	*dto.AuthLoginResponse, *dto.DefaultError,
 ) {
 	if val, detail := validator.IsValidAuthSignupRequest(req); !val {
+		l.Infof("Invalid request. Detail: %s", detail)
 		return nil, errorResponse(http.StatusUnprocessableEntity, detail)
 	}
 
 	if len(req.Password) < MinPasswordLength {
+		l.Infof("Password smaller than %v characters", MinPasswordLength)
 		return nil, errorResponse(
 			http.StatusUnprocessableEntity,
 			fmt.Sprintf(
@@ -29,6 +32,7 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	}
 
 	if !validator.IsValidEmailAddress(req.Email) {
+		l.Info("Invalid email address")
 		return nil, errorResponse(
 			http.StatusUnprocessableEntity, "Email must be a valid address",
 		)
@@ -36,20 +40,24 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	userEmail, err := s.UserEmailRepository.GetByAddress(&req.Email)
 	if err != nil {
+		l.Info("Email cannot be validated")
 		return nil, errorResponse(
 			http.StatusInternalServerError, "Email cannot be validated.",
 		)
 	}
 	if userEmail != nil {
+		l.Info("Email already in use")
 		return nil, errorResponse(http.StatusConflict, "Email already in use.")
 	}
 
 	usersTX, err := s.UsersDB.Begin()
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 	authTX, err := s.AuthDB.Begin()
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 	defer usersTX.Rollback()
@@ -63,11 +71,13 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 	username := strings.ToLower(emailUsername[:maxUsernameLength])
 	user, err := s.UserRepository.GetByUsername(&username)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 	if user != nil {
 		sufix, err := nanoid.Generate(nanoid.DefaultAlphabet, 5)
 		if err != nil {
+			l.Error(err, "")
 			return nil, errAuthInternalServerError
 		}
 		username = strings.ToLower(fmt.Sprintf("%s_%s", username, sufix))
@@ -75,11 +85,13 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 
 	newUser, err := s.UserRepository.CreateWithTX(usersTX, &username)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
 	verifyToken, err := nanoid.Generate(nanoid.DefaultAlphabet, 50)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
@@ -87,11 +99,13 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		usersTX, &newUser.ID, &req.Email, &verifyToken,
 	)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
 	bcryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.MinCost)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
@@ -99,22 +113,26 @@ func (s *authService) Signup(req *dto.AuthSignupRequest) (
 		authTX, newUser.ID, string(bcryptedPassword),
 	)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
 	accessToken, err := generateAccessToken(s.TokenManager, newUser.ID)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
 	refreshToken, err := generateRefreshToken(s.TokenManager, newUser.ID)
 	if err != nil {
+		l.Error(err, "")
 		return nil, errAuthInternalServerError
 	}
 
 	usersTX.Commit()
 	authTX.Commit()
 
+	l.Infof("User with ID = '%s' and username = '%s' created", newUser.ID, newUser.Username)
 	return &dto.AuthLoginResponse{
 		User: struct {
 			ID       string `json:"id"`

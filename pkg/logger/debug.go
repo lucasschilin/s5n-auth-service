@@ -12,7 +12,7 @@ func (l *logger) Debug(msg string) {
 		return
 	}
 
-	createLog(2, DebugConfig.label, msg, "", l.tracertID).JSON().Stdout()
+	createLog(2, DebugConfig.label, msg, "", l.tracertID).Pretty().Stdout()
 }
 
 func (l *logger) Debugf(formatMsg string, a ...any) {
