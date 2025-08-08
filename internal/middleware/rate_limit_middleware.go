@@ -11,6 +11,7 @@ import (
 
 	"github.com/lucasschilin/s5n-auth-service/internal/cache"
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
 const (
@@ -18,17 +19,18 @@ const (
 	windowDurationSeconds = 1
 )
 
-func RateLimit(cache cache.Cache) func(http.Handler) http.Handler {
+func RateLimit(l logger.Logger, cache cache.Cache) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			prefix := "rate_limit"
 			remoteAddr := r.RemoteAddr
-			ip, _, _ := net.SplitHostPort(remoteAddr)
+			ip, port, _ := net.SplitHostPort(remoteAddr)
 
 			userAgent := "unknown"
 			if r.UserAgent() != "" {
 				userAgent = r.UserAgent()
 			}
+			l.Infof("Route '%s' was requested from %s:%s(%s) address", r.RequestURI, ip, port, userAgent)
 			key := fmt.Sprintf(
 				"%s:%s", prefix, userIdentifierHash(ip+userAgent),
 			)
@@ -70,6 +72,7 @@ func RateLimit(cache cache.Cache) func(http.Handler) http.Handler {
 				json.NewEncoder(w).Encode(dto.DefaultDetailResponse{
 					Detail: "Too many requests.",
 				})
+				l.Infof("To many request from %s:%s(%s) address", ip, port, userAgent)
 				return
 			}
 

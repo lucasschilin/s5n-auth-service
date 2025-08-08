@@ -1,7 +1,5 @@
 package mailer
 
-// TODO: refatorar para o formato do cache
-
 import (
 	"errors"
 	"fmt"

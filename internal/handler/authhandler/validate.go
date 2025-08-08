@@ -21,3 +21,5 @@ func (h *handler) Validate(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 }
+
+// TODO: Log validate password

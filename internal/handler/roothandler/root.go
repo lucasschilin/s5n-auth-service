@@ -5,16 +5,21 @@ import (
 	"net/http"
 
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
 type Handler interface {
 	Root(w http.ResponseWriter, r *http.Request)
 }
 
-type handler struct{}
+type handler struct {
+	l logger.Logger
+}
 
-func NewHandler() Handler {
-	return &handler{}
+func NewHandler(l logger.Logger) Handler {
+	return &handler{
+		l: l,
+	}
 }
 
 func (h *handler) Root(w http.ResponseWriter, r *http.Request) {

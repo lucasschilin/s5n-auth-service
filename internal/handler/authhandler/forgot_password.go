@@ -29,3 +29,5 @@ func (h *handler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 }
+
+// TODO: Log forgot password

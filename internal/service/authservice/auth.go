@@ -9,13 +9,14 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/user"
 	"github.com/lucasschilin/s5n-auth-service/internal/repository/useremail"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
+	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
 )
 
 type Service interface {
-	Signup(req *dto.AuthSignupRequest) (
+	Signup(l logger.Logger, req *dto.AuthSignupRequest) (
 		*dto.AuthLoginResponse, *dto.DefaultError,
 	)
-	Login(req *dto.AuthLoginRequest) (
+	Login(l logger.Logger, req *dto.AuthLoginRequest) (
 		*dto.AuthLoginResponse, *dto.DefaultError,
 	)
 	Refresh(req *dto.AuthRefreshRequest) (
