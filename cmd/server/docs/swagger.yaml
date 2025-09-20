@@ -1,34 +1,140 @@
+basePath: /
 definitions:
+  dto.AuthForgotPasswordRequest:
+    properties:
+      email:
+        description: |-
+          Email do usuário que esqueceu a senha
+          example: lucas@schilin.com
+        example: lucas@schilin.com
+        type: string
+      redirect_url:
+        description: |-
+          URL para onde o usuário será redirecionado após redefinir a senha (precisa estar na lista de URLs permitidas)
+          example: https://app.exemplo.com/reset
+        example: https://s5n.com.br/reset
+        type: string
+    type: object
   dto.AuthLoginRequest:
     properties:
       email:
+        description: |-
+          Email do usuário já cadastrado
+          example: lucas@schilin.com
+        example: lucas@schilin.com
         type: string
       password:
+        description: |-
+          Senha em texto plano que será validada
+          example: 123456
+        example: "12345678"
         type: string
     type: object
   dto.AuthLoginResponse:
     properties:
       access_token:
+        description: |-
+          Token JWT válido para acessar recursos protegidos
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
       refresh_token:
+        description: |-
+          Token de atualização (refresh) para gerar novos access tokens
+          example: def502009c3b9b...
         type: string
       user:
+        description: Informações básicas do usuário autenticado
         properties:
           id:
+            description: |-
+              Identificador único do usuário
+              example: 123e4567-e89b-12d3-a456-426614174000
             type: string
           username:
+            description: |-
+              Nome de exibição do usuário
+              example: Lucas
             type: string
         type: object
+    type: object
+  dto.AuthRefreshRequest:
+    properties:
+      refresh_token:
+        description: |-
+          Refresh token válido emitido anteriormente
+          example: def502009c3b9b...
+        example: def502009c3b9b...
+        type: string
+    type: object
+  dto.AuthRefreshResponse:
+    properties:
+      access_token:
+        description: |-
+          Novo token de acesso
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  dto.AuthResetPasswordRequest:
+    properties:
+      new_password:
+        description: |-
+          Nova senha que substituirá a antiga
+          example: novasenha12345678
+        example: novasenha12345678
+        type: string
+      token:
+        description: |-
+          Token temporário recebido por e-mail
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  dto.AuthSignupRequest:
+    properties:
+      email:
+        description: |-
+          Email do usuário
+          Deve ser único e válido
+          example: lucas@schilin.com
+        example: lucas@schilin.com
+        type: string
+      password:
+        description: |-
+          Senha do usuário (não existe regras de formatação e será hasheada antes de persistir)
+          example: 123456
+        example: "12345678"
+        type: string
+    type: object
+  dto.AuthValidateResponse:
+    properties:
+      user:
+        description: Dados do usuário validados
+        properties:
+          id:
+            description: |-
+              Identificador único do usuário
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type: string
+        type: object
+    type: object
+  dto.DefaultDetailResponse:
+    properties:
+      detail:
+        type: string
     type: object
   dto.DefaultMessageResponse:
     properties:
       message:
         type: string
     type: object
+host: localhost:8001
 info:
-  contact: {}
-  description: This is a sample server TESTINHUUU server.
-  title: Swagger Example API
+  contact:
+    email: seuemail@exemplo.com
+    name: Lucas Schlindwein
+  description: API responsável por autenticação e gerenciamento de usuários no S5N
+    Auth Service
+  title: S5N Auth Service API
   version: "1.0"
 paths:
   /:
@@ -38,17 +144,54 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: API funcionando
           schema:
             $ref: '#/definitions/dto.DefaultMessageResponse'
       summary: Health check
       tags:
       - health
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Inicia o fluxo de recuperação de senha enviando um e-mail com link
+        de redefinição
+      parameters:
+      - description: Dados do usuário e redirect URL
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Mensagem de sucesso
+          schema:
+            $ref: '#/definitions/dto.DefaultMessageResponse'
+        "400":
+          description: Requisição malformada
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "422":
+          description: Dados inválidos ou redirect_url não permitido
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+      summary: Esqueci minha senha
+      tags:
+      - auth
   /auth/login:
     post:
-      description: Faz login
+      consumes:
+      - application/json
+      description: Realiza login e retorna tokens
       parameters:
-      - description: Dados do usuário
+      - description: Credenciais do usuário
         in: body
         name: request
         required: true
@@ -61,7 +204,164 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.AuthLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
       summary: Login
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Gera um novo access token a partir de um refresh token válido
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthRefreshResponse'
+        "400":
+          description: Requisição malformada
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "401":
+          description: Refresh token inválido ou expirado
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "422":
+          description: Payload inválido
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+      summary: Renovar access token
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Redefine a senha do usuário usando o token recebido por e-mail
+      parameters:
+      - description: Token de redefinição e nova senha
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Senha redefinida com sucesso
+          schema:
+            $ref: '#/definitions/dto.DefaultMessageResponse'
+        "400":
+          description: Requisição malformada
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "401":
+          description: Token inválido ou expirado
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "422":
+          description: Dados inválidos ou regras de senha violadas
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+      summary: Redefinir senha
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Cria uma nova conta de usuário e retorna tokens de autenticação
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthSignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthLoginResponse'
+        "400":
+          description: JSON inválido
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "409":
+          description: Email já em uso
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "422":
+          description: Dados inválidos (email ou senha)
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+      summary: Criar usuário
+      tags:
+      - auth
+  /auth/validate:
+    get:
+      description: Verifica se o access token informado é válido e retorna os dados
+        do usuário
+      parameters:
+      - description: 'Access token no formato: Bearer {token}'
+        in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthValidateResponse'
+        "401":
+          description: Token inválido ou ausente
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/dto.DefaultDetailResponse'
+      summary: Validar token de autenticação
       tags:
       - auth
 swagger: "2.0"

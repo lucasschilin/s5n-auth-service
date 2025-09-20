@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -41,7 +42,9 @@ func Setup(
 			(http.HandlerFunc(authHand.Validate)),
 		)).Methods(http.MethodGet)
 
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	swaggerEndpoint := "docs"
+	r.PathPrefix(fmt.Sprintf("/%s/", swaggerEndpoint)).Handler(httpSwagger.WrapHandler)
+	defer fmt.Printf("🚀 Swagger docs available at http://localhost:8001/%s/index.html\n", swaggerEndpoint)
 
 	return r
 }

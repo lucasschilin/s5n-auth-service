@@ -7,6 +7,19 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 )
 
+// ResetPassword godoc
+// @Summary      Redefinir senha
+// @Description  Redefine a senha do usuário usando o token recebido por e-mail
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body	dto.AuthResetPasswordRequest  true  "Token de redefinição e nova senha"
+// @Success      200  {object}  dto.DefaultMessageResponse "Senha redefinida com sucesso"
+// @Failure      400  {object}  dto.DefaultDetailResponse "Requisição malformada"
+// @Failure      422  {object}  dto.DefaultDetailResponse "Dados inválidos ou regras de senha violadas"
+// @Failure      401  {object}  dto.DefaultDetailResponse "Token inválido ou expirado"
+// @Failure      500  {object}  dto.DefaultDetailResponse "Erro interno do servidor"
+// @Router       /auth/reset-password [post]
 func (h *handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var req *dto.AuthResetPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
