@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,6 +11,9 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
 	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
+
+	_ "github.com/lucasschilin/s5n-auth-service/cmd/server/docs" // docs é gerado pelo swag
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func Setup(
@@ -37,6 +41,10 @@ func Setup(
 		middleware.CheckAuthentication(tokenManager)(
 			(http.HandlerFunc(authHand.Validate)),
 		)).Methods(http.MethodGet)
+
+	swaggerEndpoint := "docs"
+	r.PathPrefix(fmt.Sprintf("/%s/", swaggerEndpoint)).Handler(httpSwagger.WrapHandler)
+	defer fmt.Printf("🚀 Swagger docs available at http://localhost:8001/%s/index.html\n", swaggerEndpoint)
 
 	return r
 }

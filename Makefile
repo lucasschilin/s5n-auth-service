@@ -15,7 +15,7 @@ test-cov:
 
 # Inicializa / sobe / coloca pra rodar a API
 run:
-	go run ./cmd/server/
+	make docker-compose-up && go run ./cmd/server/
 	
 # Faz o build da aplicação e cria o arquivo em /build/server/
 build: 
@@ -90,5 +90,10 @@ migrate-auth-force-version:
 	-database "postgres://$(DB_AUTH_USERNAME):$(DB_AUTH_PASSWORD)@$(DB_AUTH_HOST):$(DB_AUTH_PORT)/$(DB_AUTH_NAME)?sslmode=disable" \
 	force $(VERSION) 
 # END::GOLANG-MIGRATE  COMMANDS
+
+# START::SWAG  COMMANDS
+swag-init:
+	swag init --generalInfo ./main.go --dir ./cmd/server,./internal --output ./cmd/server/docs
+# END::SWAG COMMANDS
 
 
