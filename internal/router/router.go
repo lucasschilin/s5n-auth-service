@@ -10,6 +10,9 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/middleware"
 	"github.com/lucasschilin/s5n-auth-service/internal/service/authservice/jwt"
 	"github.com/lucasschilin/s5n-auth-service/pkg/logger"
+
+	_ "github.com/lucasschilin/s5n-auth-service/cmd/server/docs" // docs é gerado pelo swag
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func Setup(
@@ -37,6 +40,8 @@ func Setup(
 		middleware.CheckAuthentication(tokenManager)(
 			(http.HandlerFunc(authHand.Validate)),
 		)).Methods(http.MethodGet)
+
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	return r
 }

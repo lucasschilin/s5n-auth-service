@@ -1,0 +1,67 @@
+definitions:
+  dto.AuthLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.AuthLoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        properties:
+          id:
+            type: string
+          username:
+            type: string
+        type: object
+    type: object
+  dto.DefaultMessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a sample server TESTINHUUU server.
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /:
+    get:
+      description: Retorna status da API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DefaultMessageResponse'
+      summary: Health check
+      tags:
+      - health
+  /auth/login:
+    post:
+      description: Faz login
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthLoginResponse'
+      summary: Login
+      tags:
+      - auth
+swagger: "2.0"
