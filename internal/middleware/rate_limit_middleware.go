@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	limit                 = 2
-	windowDurationSeconds = 1
+	limit                 = 10
+	windowDurationSeconds = 5
 )
 
 func RateLimit(l logger.Logger, cache cache.Cache) func(http.Handler) http.Handler {

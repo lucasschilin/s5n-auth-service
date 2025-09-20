@@ -22,6 +22,13 @@ func NewHandler(l logger.Logger) Handler {
 	}
 }
 
+// Root godoc
+// @Summary      Health check
+// @Description  Retorna status da API
+// @Tags         health
+// @Produce      json
+// @Success      200  {object}  dto.DefaultMessageResponse  "API funcionando"
+// @Router       / [get]
 func (h *handler) Root(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(dto.DefaultMessageResponse{

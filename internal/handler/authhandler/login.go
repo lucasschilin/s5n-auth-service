@@ -7,6 +7,19 @@ import (
 	"github.com/lucasschilin/s5n-auth-service/internal/dto"
 )
 
+// Login godoc
+// @Summary      Login
+// @Description  Realiza login e retorna tokens
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body	dto.AuthLoginRequest  true  "Credenciais do usuário"
+// @Success      200  {object}  dto.AuthLoginResponse
+// @Failure      400  {object}  dto.DefaultDetailResponse
+// @Failure      401  {object}  dto.DefaultDetailResponse
+// @Failure      422  {object}  dto.DefaultDetailResponse
+// @Failure      500  {object}  dto.DefaultDetailResponse
+// @Router       /auth/login [post]
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req *dto.AuthLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

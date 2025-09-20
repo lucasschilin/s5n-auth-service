@@ -1,0 +1,499 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API responsável por autenticação e gerenciamento de usuários no S5N Auth Service",
+        "title": "S5N Auth Service API",
+        "contact": {
+            "name": "Lucas Schlindwein",
+            "email": "seuemail@exemplo.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8001",
+    "basePath": "/",
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Retorna status da API",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "API funcionando",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultMessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "description": "Inicia o fluxo de recuperação de senha enviando um e-mail com link de redefinição",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Esqueci minha senha",
+                "parameters": [
+                    {
+                        "description": "Dados do usuário e redirect URL",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mensagem de sucesso",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Requisição malformada",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos ou redirect_url não permitido",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Realiza login e retorna tokens",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Credenciais do usuário",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Gera um novo access token a partir de um refresh token válido",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Renovar access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthRefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthRefreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Requisição malformada",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Refresh token inválido ou expirado",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Payload inválido",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "description": "Redefine a senha do usuário usando o token recebido por e-mail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Redefinir senha",
+                "parameters": [
+                    {
+                        "description": "Token de redefinição e nova senha",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Senha redefinida com sucesso",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Requisição malformada",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Token inválido ou expirado",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos ou regras de senha violadas",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signup": {
+            "post": {
+                "description": "Cria uma nova conta de usuário e retorna tokens de autenticação",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Criar usuário",
+                "parameters": [
+                    {
+                        "description": "Dados do usuário",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthSignupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "JSON inválido",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Email já em uso",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos (email ou senha)",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/validate": {
+            "get": {
+                "description": "Verifica se o access token informado é válido e retorna os dados do usuário",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Validar token de autenticação",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Access token no formato: Bearer {token}",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthValidateResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Token inválido ou ausente",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DefaultDetailResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.AuthForgotPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "Email do usuário que esqueceu a senha\nexample: lucas@schilin.com",
+                    "type": "string",
+                    "example": "lucas@schilin.com"
+                },
+                "redirect_url": {
+                    "description": "URL para onde o usuário será redirecionado após redefinir a senha (precisa estar na lista de URLs permitidas)\nexample: https://app.exemplo.com/reset",
+                    "type": "string",
+                    "example": "https://s5n.com.br/reset"
+                }
+            }
+        },
+        "dto.AuthLoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "Email do usuário já cadastrado\nexample: lucas@schilin.com",
+                    "type": "string",
+                    "example": "lucas@schilin.com"
+                },
+                "password": {
+                    "description": "Senha em texto plano que será validada\nexample: 123456",
+                    "type": "string",
+                    "example": "12345678"
+                }
+            }
+        },
+        "dto.AuthLoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "Token JWT válido para acessar recursos protegidos\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "description": "Token de atualização (refresh) para gerar novos access tokens\nexample: def502009c3b9b...",
+                    "type": "string"
+                },
+                "user": {
+                    "description": "Informações básicas do usuário autenticado",
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "Identificador único do usuário\nexample: 123e4567-e89b-12d3-a456-426614174000",
+                            "type": "string"
+                        },
+                        "username": {
+                            "description": "Nome de exibição do usuário\nexample: Lucas",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "dto.AuthRefreshRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "description": "Refresh token válido emitido anteriormente\nexample: def502009c3b9b...",
+                    "type": "string",
+                    "example": "def502009c3b9b..."
+                }
+            }
+        },
+        "dto.AuthRefreshResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "Novo token de acesso\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AuthResetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "description": "Nova senha que substituirá a antiga\nexample: novasenha12345678",
+                    "type": "string",
+                    "example": "novasenha12345678"
+                },
+                "token": {
+                    "description": "Token temporário recebido por e-mail\nexample: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "dto.AuthSignupRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "Email do usuário\nDeve ser único e válido\nexample: lucas@schilin.com",
+                    "type": "string",
+                    "example": "lucas@schilin.com"
+                },
+                "password": {
+                    "description": "Senha do usuário (não existe regras de formatação e será hasheada antes de persistir)\nexample: 123456",
+                    "type": "string",
+                    "example": "12345678"
+                }
+            }
+        },
+        "dto.AuthValidateResponse": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "description": "Dados do usuário validados",
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "Identificador único do usuário\nexample: 123e4567-e89b-12d3-a456-426614174000",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "dto.DefaultDetailResponse": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.DefaultMessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -20,8 +20,6 @@ Este é um **projeto de autenticação desenvolvido em Go** para **estudo de con
 
 > **Nota:** Este projeto é para fins de estudo e não é recomendado para uso direto em produção sem revisões de segurança e ajustes adicionais.
 
----
-
 
 ## Tecnologias utilizadas
 - **Go 1.24**
