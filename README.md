@@ -1,4 +1,4 @@
-# s5n-auth-service
+# Authentication API
 
 <p align="left">
   <img src="https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white" alt="Go 1.24">
